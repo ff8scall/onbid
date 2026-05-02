@@ -267,7 +267,11 @@ export default function ItemDetail() {
               </div>
 
               <button 
-                onClick={() => window.open(`https://www.onbid.co.kr/op/cta/cltrdtl/collateralDetailInfo.do?cltrMngNo=${item.cltr_mng_no}`, "_blank")}
+                onClick={() => {
+                  const pbctCdtnNo = item.raw_data.pbctCdtnNo;
+                  const url = `https://www.onbid.co.kr/op/cta/cltrdtl/collateralDetailInfo.do?cltrMngNo=${item.cltr_mng_no}${pbctCdtnNo ? `&pbctCdtnNo=${pbctCdtnNo}` : ""}`;
+                  window.open(url, "_blank");
+                }}
                 className="w-full py-5 bg-white text-black rounded-[1.5rem] font-black text-lg hover:bg-indigo-500 hover:text-white transition-all shadow-xl hover:shadow-indigo-500/20 active:scale-[0.98] mb-4"
               >
                 온비드에서 입찰하기
