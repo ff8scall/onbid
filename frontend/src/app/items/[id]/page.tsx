@@ -1,0 +1,288 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import Link from "next/link";
+
+interface OnbidItem {
+  id: number;
+  pbanc_mng_no: string;
+  cltr_mng_no: string;
+  onbid_cltr_nm: string;
+  cltr_adr: string;
+  min_bid_prc: number;
+  sub_category: string;
+  thumb_url?: string;
+  created_at: string;
+  raw_data: any;
+  ai_score?: number;
+  ai_estimated_specs?: string;
+  ai_reason?: string;
+  ai_recommendation?: string;
+  ai_catchphrase?: string;
+  ai_risk_factor?: string;
+  ai_resale_value?: number;
+  ai_is_pickup_friendly?: number;
+  is_ai_processed?: number;
+}
+
+export default function ItemDetail() {
+  const { id } = useParams();
+  const router = useRouter();
+  const [item, setItem] = useState<OnbidItem | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchItem();
+  }, [id]);
+
+  const fetchItem = async () => {
+    try {
+      const res = await fetch(`http://localhost:8000/items/${id}`);
+      const data = await res.json();
+      if (data.error) {
+        alert(data.error);
+        router.push("/");
+      } else {
+        setItem(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch item", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0a0a0c] flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-white/10 border-t-white rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
+  if (!item) return null;
+
+  const getScoreColor = (score: number) => {
+    if (score >= 80) return "text-emerald-400";
+    if (score >= 60) return "text-amber-400";
+    return "text-slate-400";
+  };
+
+  return (
+    <div className="min-h-screen bg-[#0a0a0c] text-slate-200 font-sans pb-20">
+      {/* Top Bar */}
+      <div className="border-b border-white/5 bg-[#0a0a0c]/80 backdrop-blur-md sticky top-0 z-50">
+        <div className="max-w-5xl mx-auto px-6 h-16 flex items-center justify-between">
+          <Link href="/" className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors">
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span className="text-sm font-bold">목록으로 돌아가기</span>
+          </Link>
+          <div className="text-[10px] font-mono text-slate-600 tracking-widest uppercase">
+            {item.cltr_mng_no}
+          </div>
+        </div>
+      </div>
+
+      <main className="max-w-5xl mx-auto px-6 mt-12">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          {/* Left: Main Info */}
+          <div className="lg:col-span-2">
+            
+            {/* Image Banner */}
+            <div className="relative w-full aspect-video rounded-[3rem] overflow-hidden mb-12 border border-white/5 bg-white/5 shadow-2xl group">
+              {item.thumb_url ? (
+                <img 
+                  src={item.thumb_url} 
+                  alt={item.onbid_cltr_nm}
+                  className="w-full h-full object-contain"
+                />
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center text-slate-700">
+                  <svg className="w-20 h-20 mb-4 opacity-20" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <p className="text-sm font-bold opacity-20 uppercase tracking-widest">No Original Photo Provided</p>
+                </div>
+              )}
+              <div className="absolute bottom-8 left-8">
+                 <span className="px-5 py-2 bg-black/60 backdrop-blur-xl text-white text-xs font-black rounded-2xl border border-white/10 uppercase tracking-[0.2em]">
+                  Real Photo Reference
+                </span>
+              </div>
+            </div>
+
+            <div className="mb-8">
+              <div className="flex items-center gap-3 mb-6">
+                <span className="px-4 py-1.5 bg-indigo-500/10 text-indigo-400 text-xs font-black rounded-xl border border-indigo-500/20 uppercase tracking-widest">
+                  {item.sub_category}
+                </span>
+                {item.ai_recommendation === "Strong Buy" && (
+                  <span className="px-4 py-1.5 bg-emerald-500 text-white text-[10px] font-black rounded-xl shadow-lg shadow-emerald-500/20 uppercase tracking-widest">
+                    Hot Deal
+                  </span>
+                )}
+              </div>
+              <h1 className="text-4xl font-black text-white leading-tight mb-6 tracking-tight">
+                {item.onbid_cltr_nm}
+              </h1>
+              <div className="flex items-center gap-4 text-slate-400 text-sm">
+                <div className="flex items-center gap-1.5">
+                  <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                  </svg>
+                  {item.cltr_adr}
+                </div>
+                <div className="w-1 h-1 bg-slate-700 rounded-full"></div>
+                <div className="font-bold">{item.raw_data.orgNm || "집행기관 정보 없음"}</div>
+              </div>
+            </div>
+
+            {/* AI Analysis Card */}
+            {item.is_ai_processed === 1 ? (
+              <div className="bg-gradient-to-br from-white/[0.05] to-white/[0.01] border border-white/10 rounded-[2.5rem] p-10 mb-12 shadow-2xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 blur-[100px] -z-10"></div>
+                
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12">
+                  <div>
+                    <h2 className="text-indigo-400 text-sm font-black uppercase tracking-widest mb-2">AI Expert Analysis</h2>
+                    <p className="text-2xl font-bold text-white leading-tight">
+                      "{item.ai_catchphrase}"
+                    </p>
+                  </div>
+                  <div className="text-center bg-white/5 rounded-3xl p-6 border border-white/5 min-w-[140px]">
+                    <div className={`text-5xl font-black mb-1 ${getScoreColor(item.ai_score || 0)}`}>
+                      {item.ai_score}
+                    </div>
+                    <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">가성비 점수</div>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 mb-10">
+                  <div className="space-y-8">
+                    <div>
+                      <h3 className="text-white font-bold mb-4 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
+                        확정 상세 사양
+                      </h3>
+                      <div className="bg-black/20 rounded-2xl p-6 text-slate-300 text-sm font-medium leading-relaxed border border-white/5">
+                        {item.ai_estimated_specs}
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-white font-bold mb-4 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                        주의사항 (Risk Factor)
+                      </h3>
+                      <div className="bg-red-500/5 rounded-2xl p-6 text-red-200/80 text-sm leading-relaxed border border-red-500/10">
+                        {item.ai_risk_factor || "특이사항 없음"}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="space-y-8">
+                    <div>
+                      <h3 className="text-white font-bold mb-4 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
+                        점수 산정 근거
+                      </h3>
+                      <div className="bg-black/20 rounded-2xl p-6 text-slate-400 text-sm leading-relaxed border border-white/5">
+                        {item.ai_reason}
+                      </div>
+                    </div>
+                    <div>
+                      <h3 className="text-white font-bold mb-4 flex items-center gap-2">
+                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                        예상 중고 시세
+                      </h3>
+                      <div className="bg-emerald-500/5 rounded-2xl p-6 text-emerald-400 text-xl font-black border border-emerald-500/10">
+                        약 {item.ai_resale_value?.toLocaleString() || "0"} 원
+                        <span className="block text-[10px] text-emerald-500/60 font-medium mt-1">
+                          * AI 추정치로 실제 시세와 다를 수 있습니다.
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-10 pt-10 border-t border-white/5 flex flex-wrap gap-4">
+                  {item.ai_is_pickup_friendly === 1 && (
+                    <div className="px-5 py-2.5 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl">
+                      <span className="text-indigo-400 text-xs font-bold">📍 직거래 추천 지역</span>
+                    </div>
+                  )}
+                  <div className="px-5 py-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
+                    <span className="text-emerald-400 text-xs font-bold">✨ 실사용 추천</span>
+                  </div>
+                  <div className="px-5 py-2.5 bg-purple-500/10 border border-purple-500/20 rounded-2xl">
+                    <span className="text-purple-400 text-xs font-bold">💎 희귀 매물</span>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="bg-white/5 border border-white/5 rounded-[2.5rem] p-10 mb-12 text-center">
+                <p className="text-slate-500 italic">AI 심층 분석이 진행 중인 매물입니다.</p>
+              </div>
+            )}
+
+            {/* Raw Data Section */}
+            <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-10">
+              <h3 className="text-xl font-bold text-white mb-8">온비드 원본 정보</h3>
+              <div className="space-y-6">
+                {Object.entries(item.raw_data).map(([key, value]) => (
+                  <div key={key} className="flex flex-col md:flex-row md:items-center py-4 border-b border-white/5 last:border-0 gap-2 md:gap-0">
+                    <div className="md:w-1/3 text-slate-500 text-sm font-bold uppercase tracking-wider">{key}</div>
+                    <div className="md:w-2/3 text-slate-300 text-sm break-all font-mono">{String(value)}</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Right: Price & CTA */}
+          <div className="lg:col-span-1">
+            <div className="bg-white/[0.03] border border-white/10 rounded-[2.5rem] p-8 sticky top-28 shadow-2xl">
+              <div className="mb-8">
+                <span className="text-[10px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 block">현재 최저입찰가</span>
+                <div className="text-4xl font-black text-white">
+                  {Number(item.min_bid_prc).toLocaleString()}
+                  <span className="text-lg font-normal text-slate-400 ml-1">원</span>
+                </div>
+              </div>
+
+              <div className="space-y-4 mb-8">
+                <div className="flex items-center justify-between py-3 border-b border-white/5">
+                  <span className="text-slate-500 text-xs font-bold uppercase">물건 상태</span>
+                  <span className="text-white text-sm font-bold">중고/불용</span>
+                </div>
+                <div className="flex items-center justify-between py-3 border-b border-white/5">
+                  <span className="text-slate-500 text-xs font-bold uppercase">입찰 방식</span>
+                  <span className="text-white text-sm font-bold">최고가방식</span>
+                </div>
+                <div className="flex items-center justify-between py-3">
+                  <span className="text-slate-500 text-xs font-bold uppercase">집행 기관</span>
+                  <span className="text-white text-sm font-bold truncate ml-4">{item.raw_data.orgNm || "정보없음"}</span>
+                </div>
+              </div>
+
+              <button 
+                onClick={() => window.open(`https://www.onbid.co.kr/op/cta/cltrdtl/collateralDetailInfo.do?cltrMngNo=${item.cltr_mng_no}`, "_blank")}
+                className="w-full py-5 bg-white text-black rounded-[1.5rem] font-black text-lg hover:bg-indigo-500 hover:text-white transition-all shadow-xl hover:shadow-indigo-500/20 active:scale-[0.98] mb-4"
+              >
+                온비드에서 입찰하기
+              </button>
+              <button className="w-full py-5 bg-white/5 text-white border border-white/10 rounded-[1.5rem] font-black text-sm hover:bg-white/10 transition-all">
+                관심 물건 저장
+              </button>
+              
+              <p className="mt-6 text-[10px] text-slate-500 text-center leading-relaxed font-medium">
+                * 본 분석 결과는 AI의 추정치이며, 입찰 전 반드시 <br/>현장을 방문하여 실물 상태를 확인하시기 바랍니다.
+              </p>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+  );
+}

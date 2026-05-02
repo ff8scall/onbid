@@ -1,0 +1,192 @@
+import requests
+import json
+import sqlite3
+import os
+import xml.etree.ElementTree as ET
+from datetime import datetime
+
+# 설정
+SERVICE_KEY = "f095a73a6d8ff681e2c7ab78b7488d895a91b64860bf8af230f64cd223257e45"
+DETAIL_URL = "https://apis.data.go.kr/B010003/OnbidPbancCltrDtlSrvc2/getPbancCltrInf2"
+LIST_URL = "https://apis.data.go.kr/B010003/OnbidMvastListSrvc2/getMvastCltrList2"
+DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'pbid_local.db')
+
+# 분류 키워드
+CATEGORIES = {
+    '데스크탑': ['컴퓨터', '데스크탑', '본체', '워크스테이션', 'PC'],
+    '노트북': ['노트북', '랩탑', '맥북', '그램', '서피스', 'Laptop', 'Macbook'],
+    '휴대폰': ['휴대폰', '스마트폰', '아이폰', '갤럭시', '핸드폰', 'iPhone', 'Galaxy'],
+    '태블릿': ['태블릿', '아이패드', '갤럭시탭', 'iPad', 'Galaxy Tab', '태블릿PC'],
+    '모니터': ['모니터', '디스플레이', 'Monitor'],
+    '부품/주변기기': ['그래픽카드', 'GPU', 'RTX', 'RAM', 'SSD', 'CPU', '메모리', '하드디스크', '키보드', '마우스']
+}
+
+def classify_item(name):
+    """물건명을 기반으로 카테고리 분류"""
+    name_upper = name.upper()
+    for cat, keywords in CATEGORIES.items():
+        for kw in keywords:
+            if kw.upper() in name_upper:
+                return "IT/장비", cat
+    return "기타", "미분류"
+
+def parse_xml_to_dict_list(xml_content):
+    """XML 응답을 딕셔너리 리스트로 변환"""
+    try:
+        root = ET.fromstring(xml_content)
+        items = []
+        for item_node in root.findall('.//item'):
+            item_dict = {}
+            for child in item_node:
+                item_dict[child.tag] = child.text
+            items.append(item_dict)
+        return items
+    except Exception as e:
+        print(f"[!] XML Parsing Error: {e}")
+        return []
+
+import time
+from urllib.parse import quote
+
+def search_it_items():
+    """신규 동산 목록 API를 사용하여 IT 관련 매물 검색 및 저장 (XML 우회 방식)"""
+    search_keywords = ["노트북", "컴퓨터", "PC", "휴대폰", "아이폰", "갤럭시", "모니터", "태블릿", "서버", "워크스테이션"]
+    
+    conn = sqlite3.connect(DB_PATH, timeout=20) # DB Lock 방지 타임아웃 추가
+    cursor = conn.cursor()
+    total_new_saved = 0
+
+    for keyword in search_keywords:
+        print(f"[*] Searching for keyword: {keyword}")
+        # 인증키 인코딩 이슈를 피하기 위해 URL에 직접 삽입
+        url = f"http://apis.data.go.kr/B010003/OnbidMvastListSrvc2/getMvastCltrList2?serviceKey={SERVICE_KEY}"
+        params = {
+            "pageNo": 1,
+            "numOfRows": 100,
+            "prptDivCd": "0007,0010,0005,0004,0002,0003,0006,0008,0011,0013",
+            "pvctTrgtYn": "N",
+            "onbidCltrNm": keyword # requests가 인코딩하도록 둠
+        }
+        
+        try:
+            time.sleep(1) # TPS 제한 대응
+            response = requests.get(url, params=params, timeout=30)
+            if response.status_code != 200:
+                print(f"[!] Error: Status code {response.status_code}")
+                continue
+                
+            # XML 파싱
+            items = parse_xml_to_dict_list(response.text)
+            if not items:
+                print(f"[*] No items found for '{keyword}'.")
+                continue
+
+            for item in items:
+                cltr_nm = item.get('onbidCltrNm', '')
+                main_cat, sub_cat = classify_item(cltr_nm)
+                
+                try:
+                    cursor.execute('''
+                        INSERT OR REPLACE INTO onbid_items (
+                            pbanc_mng_no, cltr_mng_no, onbid_cltr_nm, cltr_adr, 
+                            min_bid_prc, main_category, sub_category, thumb_url, raw_data
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    ''', (
+                        str(item.get('onbidPbancNo')), 
+                        item.get('cltrMngNo'),
+                        cltr_nm,
+                        f"{item.get('lctnSdnm', '')} {item.get('lctnSggnm', '')} {item.get('lctnEmdNm', '')}",
+                        item.get('lowstBidPrcIndctCont'),
+                        main_cat,
+                        sub_cat,
+                        item.get('thnlImgUrlAdr'),
+                        json.dumps(item, ensure_ascii=False)
+                    ))
+                    total_new_saved += 1
+                except Exception as e:
+                    print(f"[!] DB Insert Error: {e}")
+                    
+        except Exception as e:
+            print(f"[!] Connection Error for '{keyword}': {e}")
+            
+    conn.commit()
+    conn.close()
+    print(f"[*] Search completed. Total {total_new_saved} new items processed.")
+
+def get_item_detail_text(pbanc_mng_no, cltr_mng_no):
+    """특정 물건의 상세 설명(cltrDtlCont)을 가져옴"""
+    params = {
+        "serviceKey": SERVICE_KEY,
+        "pageNo": 1,
+        "numOfRows": 10,
+        "resultType": "json",
+        "pbancMngNo": pbanc_mng_no
+    }
+    
+    try:
+        response = requests.get(DETAIL_URL, params=params, timeout=20)
+        if response.status_code == 200:
+            data = response.json()
+            items = data.get('body', {}).get('items', {}).get('item', [])
+            # 해당 관리번호를 가진 아이템 찾기
+            for item in items:
+                if str(item.get('cltrMngNo')) == str(cltr_mng_no):
+                    return item.get('cltrDtlCont', "")
+    except Exception as e:
+        print(f"[!] Detailed API Error: {e}")
+    return ""
+
+def collect_details(pbanc_mng_no):
+    """공고번호를 기준으로 상세 물건 정보 수집 (JSON 작동함)"""
+    params = {
+        "serviceKey": SERVICE_KEY,
+        "pageNo": 1,
+        "numOfRows": 100,
+        "resultType": "json",
+        "pbancMngNo": pbanc_mng_no
+    }
+    
+    print(f"[*] Collecting details for announcement: {pbanc_mng_no}")
+    try:
+        response = requests.get(DETAIL_URL, params=params, timeout=30)
+        if response.status_code != 200:
+            print(f"[!] Error: Status code {response.status_code}")
+            return
+        
+        data = response.json()
+        items = data.get('body', {}).get('items', {}).get('item', [])
+        
+        conn = sqlite3.connect(DB_PATH)
+        cursor = conn.cursor()
+        
+        count = 0
+        for item in items:
+            cltr_nm = item.get('onbidCltrNm', '')
+            main_cat, sub_cat = classify_item(cltr_nm)
+            
+            cursor.execute('''
+                INSERT OR REPLACE INTO onbid_items (
+                    pbanc_mng_no, cltr_mng_no, onbid_cltr_nm, cltr_adr, 
+                    min_bid_prc, main_category, sub_category, thumb_url, raw_data
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+            ''', (
+                item.get('pbancMngNo'),
+                item.get('cltrMngNo'),
+                cltr_nm,
+                item.get('cltrAdr'),
+                item.get('lowstBidPrcIndctCont'),
+                main_cat,
+                sub_cat,
+                item.get('thnlImgUrlAdr'),
+                json.dumps(item, ensure_ascii=False)
+            ))
+            count += 1
+        
+        conn.commit()
+        conn.close()
+        print(f"[*] Total {count} items processed for {pbanc_mng_no}.")
+    except Exception as e:
+        print(f"[!] Connection Error: {e}")
+
+if __name__ == "__main__":
+    search_it_items()
