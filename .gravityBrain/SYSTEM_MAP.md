@@ -1,26 +1,29 @@
-# 🗺️ Pbid Hunter 시스템 지도 (SYSTEM_MAP)
+# 🗺️ OnBid Arbitrage Master 시스템 지도 (SYSTEM_MAP)
 
 ## 1. 프로젝트 개요
-온비드(공매) 데이터를 실시간으로 수집하여 IT 기기(노트북, 데스크톱, 모니터 등)의 가성비를 AI로 분석하고 최적의 매물을 추천하는 대시보드 시스템.
+온비드(공매) 데이터를 실시간 수집하여 **환금성 자산(전자기기, 명품, 귀금속, 상품권)**의 중고 시세 대비 차익을 분석하고 '무위험 수익' 매물을 추천하는 리셀링 투자 보조 시스템.
 
 ## 2. 기술 스택
-- **Backend**: Python (FastAPI/Flask), SQLite3
+- **Backend**: Python (FastAPI), SQLite3
 - **Frontend**: Next.js (App Router), TailwindCSS
-- **AI Engine**: Google Gemini 1.5 Flash (Fallback: Local Heuristic Engine)
-- **External API**: 온비드 공공데이터 API (동산 목록, 이미지 정보 등)
+- **AI Engine**: 
+  - **Maverick (NVIDIA NIM)**: Stage 1 광역 필터링 (배치 처리)
+  - **Flash (Gemini 1.5)**: Stage 2 정밀 분석 및 리포트 생성
+- **External API**: 온비드 공공데이터 API (동산 목록/상세)
 
-## 3. 디렉토리 구조
-- `/backend`: 데이터 수집, 분석, API 서버
-  - `collector.py`: 온비드 실시간 매물 수집기
-  - `ai_analyzer.py`: 매물 심층 분석 및 스코어링 엔진
-  - `main.py`: 프론트엔드용 REST API 서버
-  - `init_db.py`: DB 스키마 초기화 및 마이그레이션
-- `/frontend`: 사용자 인터페이스
-  - `src/app/page.tsx`: 실시간 큐레이션 대시보드
-  - `src/app/items/[id]/page.tsx`: 매물 상세 및 AI 리포트 페이지
-- `/data`: 데이터베이스 파일 (`pbid_local.db`)
+## 3. AI 분석 파이프라인 (Funnel Architecture)
+1. **Stage 0 (Rule-base)**: 블랙리스트 키워드 필터링 및 텍스트 전처리(HTML 제거).
+2. **Stage 1 (Maverick)**: 50개 단위 배치 처리로 고수익 후보군(is_maverick_selected) 선별.
+3. **Stage 2 (Flash)**: 선별된 정예 매물 대상 정밀 분석 및 외부 시세 검증 리포트 생성.
 
-## 4. 데이터 흐름
-1. `collector.py` 실행 -> 온비드 API 호출 -> IT 관련 매물 필터링 및 DB 저장
-2. `ai_analyzer.py` 실행 -> 미분석 매물 추출 -> AI(Gemini) 또는 로컬 룰을 통한 분석 -> DB 업데이트
-3. `main.py` 서버 구동 -> 프론트엔드에서 API 호출 -> 대시보드 시각화
+## 4. 핵심 데이터 로직
+- **Arbitrage Calculation**: `(추정 시장가 - 최저입찰가) = 예상 수익금`
+- **Filtering**: 투자 점수 60점 미만 또는 비타겟 매물은 `is_substandard` 플래그 보관.
+
+## 5. 디렉토리 구조
+- `/backend`: 수집 및 AI 분석 파이프라인
+  - `collector.py`: 타겟 키워드 기반 매물 수집기
+  - `ai_analyzer.py`: Maverick -> Flash 깔때기 분석 엔진
+  - `main.py`: 수익성 데이터 서빙 API
+- `/frontend`: 리셀러 특화 대시보드
+  - `src/app/page.tsx`: 정예/후보/미달 탭 기반 큐레이션 보드

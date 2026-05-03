@@ -46,7 +46,16 @@ def init_db():
         ("ai_resale_value", "INTEGER"),
         ("ai_is_pickup_friendly", "INTEGER DEFAULT 0"),
         ("is_ai_processed", "INTEGER DEFAULT 0"),
-        ("thumb_url", "TEXT")
+        ("thumb_url", "TEXT"),
+        ("ai_expected_profit", "INTEGER DEFAULT 0"),
+        ("ai_margin_percent", "REAL DEFAULT 0.0"),
+        ("ai_pickup_method", "TEXT"),
+        ("ai_difficulty", "TEXT"),
+        ("ai_curator_comment", "TEXT"),
+        ("is_target_item", "INTEGER DEFAULT 0"),
+        ("is_substandard", "INTEGER DEFAULT 0"),
+        ("is_maverick_selected", "INTEGER DEFAULT 0"),
+        ("ai_deep_dive_report", "TEXT")
     ]
     
     cursor.execute("PRAGMA table_info(onbid_items)")

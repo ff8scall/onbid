@@ -15,14 +15,14 @@ interface OnbidItem {
   thumb_url?: string;
   created_at: string;
   raw_data: any;
-  ai_score?: number;
-  ai_estimated_specs?: string;
-  ai_reason?: string;
-  ai_recommendation?: string;
-  ai_catchphrase?: string;
+  ai_score: number;
+  ai_expected_profit: number;
+  ai_margin_percent: number;
+  ai_pickup_method: string;
+  ai_difficulty: string;
+  ai_curator_comment: string;
+  ai_resale_value: number;
   ai_risk_factor?: string;
-  ai_resale_value?: number;
-  ai_is_pickup_friendly?: number;
   is_ai_processed?: number;
 }
 
@@ -69,6 +69,12 @@ export default function ItemDetail() {
     return "text-slate-400";
   };
 
+  const getDifficultyColor = (diff: string) => {
+    if (diff === "Low") return "text-emerald-400";
+    if (diff === "Medium") return "text-amber-400";
+    return "text-red-400";
+  };
+
   return (
     <div className="min-h-screen bg-[#0a0a0c] text-slate-200 font-sans pb-20">
       {/* Top Bar */}
@@ -78,10 +84,10 @@ export default function ItemDetail() {
             <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
-            <span className="text-sm font-bold">목록으로 돌아가기</span>
+            <span className="text-sm font-bold">리스트로 돌아가기</span>
           </Link>
           <div className="text-[10px] font-mono text-slate-600 tracking-widest uppercase">
-            {item.cltr_mng_no}
+            ID: {item.cltr_mng_no}
           </div>
         </div>
       </div>
@@ -107,11 +113,6 @@ export default function ItemDetail() {
                   <p className="text-sm font-bold opacity-20 uppercase tracking-widest">No Original Photo Provided</p>
                 </div>
               )}
-              <div className="absolute bottom-8 left-8">
-                 <span className="px-5 py-2 bg-black/60 backdrop-blur-xl text-white text-xs font-black rounded-2xl border border-white/10 uppercase tracking-[0.2em]">
-                  Real Photo Reference
-                </span>
-              </div>
             </div>
 
             <div className="mb-8">
@@ -119,11 +120,9 @@ export default function ItemDetail() {
                 <span className="px-4 py-1.5 bg-indigo-500/10 text-indigo-400 text-xs font-black rounded-xl border border-indigo-500/20 uppercase tracking-widest">
                   {item.sub_category}
                 </span>
-                {item.ai_recommendation === "Strong Buy" && (
-                  <span className="px-4 py-1.5 bg-emerald-500 text-white text-[10px] font-black rounded-xl shadow-lg shadow-emerald-500/20 uppercase tracking-widest">
-                    Hot Deal
-                  </span>
-                )}
+                <span className="px-4 py-1.5 bg-emerald-500/10 text-emerald-400 text-xs font-black rounded-xl border border-emerald-500/20 uppercase tracking-widest">
+                  {item.ai_pickup_method}
+                </span>
               </div>
               <h1 className="text-4xl font-black text-white leading-tight mb-6 tracking-tight">
                 {item.onbid_cltr_nm}
@@ -135,28 +134,26 @@ export default function ItemDetail() {
                   </svg>
                   {item.cltr_adr}
                 </div>
-                <div className="w-1 h-1 bg-slate-700 rounded-full"></div>
-                <div className="font-bold">{item.raw_data.orgNm || "집행기관 정보 없음"}</div>
               </div>
             </div>
 
-            {/* AI Analysis Card */}
+            {/* AI Arbitrage Analysis Card */}
             {item.is_ai_processed === 1 ? (
               <div className="bg-gradient-to-br from-white/[0.05] to-white/[0.01] border border-white/10 rounded-[2.5rem] p-10 mb-12 shadow-2xl relative overflow-hidden">
-                <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 blur-[100px] -z-10"></div>
+                <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[100px] -z-10"></div>
                 
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12">
                   <div>
-                    <h2 className="text-indigo-400 text-sm font-black uppercase tracking-widest mb-2">AI Expert Analysis</h2>
+                    <h2 className="text-emerald-400 text-sm font-black uppercase tracking-widest mb-2">Expert Arbitrage Report</h2>
                     <p className="text-2xl font-bold text-white leading-tight">
-                      "{item.ai_catchphrase}"
+                      "{item.ai_curator_comment}"
                     </p>
                   </div>
                   <div className="text-center bg-white/5 rounded-3xl p-6 border border-white/5 min-w-[140px]">
                     <div className={`text-5xl font-black mb-1 ${getScoreColor(item.ai_score || 0)}`}>
                       {item.ai_score}
                     </div>
-                    <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">가성비 점수</div>
+                    <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">투자 매력도</div>
                   </div>
                 </div>
 
@@ -164,65 +161,69 @@ export default function ItemDetail() {
                   <div className="space-y-8">
                     <div>
                       <h3 className="text-white font-bold mb-4 flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
-                        확정 상세 사양
+                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
+                        수익성 분석 (Financials)
                       </h3>
-                      <div className="bg-black/20 rounded-2xl p-6 text-slate-300 text-sm font-medium leading-relaxed border border-white/5">
-                        {item.ai_estimated_specs}
+                      <div className="bg-black/20 rounded-2xl p-6 border border-white/5 space-y-4">
+                        <div className="flex justify-between items-center">
+                          <span className="text-slate-500 text-xs">추정 시장가</span>
+                          <span className="text-white font-bold">{item.ai_resale_value?.toLocaleString()}원</span>
+                        </div>
+                        <div className="flex justify-between items-center text-red-400">
+                          <span className="text-slate-500 text-xs">입찰가(비용)</span>
+                          <span className="font-bold">-{item.min_bid_prc.toLocaleString()}원</span>
+                        </div>
+                        <div className="pt-4 border-t border-white/5 flex justify-between items-center">
+                          <span className="text-emerald-400 font-black">예상 순수익</span>
+                          <span className="text-emerald-400 text-2xl font-black">+{item.ai_expected_profit.toLocaleString()}원</span>
+                        </div>
+                        <div className="text-right text-[10px] text-emerald-500/60 font-bold uppercase tracking-widest">
+                          ROI: {item.ai_margin_percent.toFixed(1)}%
+                        </div>
                       </div>
                     </div>
                     <div>
                       <h3 className="text-white font-bold mb-4 flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
-                        주의사항 (Risk Factor)
+                        <span className="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
+                        인수 난이도 (Friction)
                       </h3>
-                      <div className="bg-red-500/5 rounded-2xl p-6 text-red-200/80 text-sm leading-relaxed border border-red-500/10">
-                        {item.ai_risk_factor || "특이사항 없음"}
+                      <div className="bg-amber-500/5 rounded-2xl p-6 border border-amber-500/10">
+                        <div className="flex items-center justify-between mb-2">
+                          <span className="text-slate-400 text-xs font-bold uppercase">수령 방식</span>
+                          <span className="text-white font-bold">{item.ai_pickup_method}</span>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <span className="text-slate-400 text-xs font-bold uppercase">난이도 등급</span>
+                          <span className={`font-black ${getDifficultyColor(item.ai_difficulty)}`}>{item.ai_difficulty}</span>
+                        </div>
                       </div>
                     </div>
                   </div>
                   <div className="space-y-8">
                     <div>
                       <h3 className="text-white font-bold mb-4 flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
-                        점수 산정 근거
+                        <span className="w-1.5 h-1.5 bg-red-500 rounded-full"></span>
+                        주의사항 (Risk Factor)
                       </h3>
-                      <div className="bg-black/20 rounded-2xl p-6 text-slate-400 text-sm leading-relaxed border border-white/5">
-                        {item.ai_reason}
+                      <div className="bg-red-500/5 rounded-2xl p-6 text-red-200/80 text-sm leading-relaxed border border-red-500/10 h-[100px] overflow-y-auto">
+                        {item.ai_risk_factor || "특이사항 없음"}
                       </div>
                     </div>
                     <div>
                       <h3 className="text-white font-bold mb-4 flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 bg-emerald-500 rounded-full"></span>
-                        예상 중고 시세
+                        <span className="w-1.5 h-1.5 bg-indigo-500 rounded-full"></span>
+                        데이터 파싱 기반 사양
                       </h3>
-                      <div className="bg-emerald-500/5 rounded-2xl p-6 text-emerald-400 text-xl font-black border border-emerald-500/10">
-                        약 {item.ai_resale_value?.toLocaleString() || "0"} 원
-                        <span className="block text-[10px] text-emerald-500/60 font-medium mt-1">
-                          * AI 추정치로 실제 시세와 다를 수 있습니다.
-                        </span>
+                      <div className="bg-black/20 rounded-2xl p-6 text-slate-400 text-xs leading-relaxed border border-white/5 h-[150px] overflow-y-auto font-mono">
+                        {item.raw_data.cltrDtlCont || "원본 데이터에 상세 설명이 없습니다."}
                       </div>
                     </div>
-                  </div>
-                </div>
-
-                <div className="mt-10 pt-10 border-t border-white/5 flex flex-wrap gap-4">
-                  {item.ai_is_pickup_friendly === 1 && (
-                    <div className="px-5 py-2.5 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl">
-                      <span className="text-indigo-400 text-xs font-bold">📍 직거래 추천 지역</span>
-                    </div>
-                  )}
-                  <div className="px-5 py-2.5 bg-emerald-500/10 border border-emerald-500/20 rounded-2xl">
-                    <span className="text-emerald-400 text-xs font-bold">✨ 실사용 추천</span>
-                  </div>
-                  <div className="px-5 py-2.5 bg-purple-500/10 border border-purple-500/20 rounded-2xl">
-                    <span className="text-purple-400 text-xs font-bold">💎 희귀 매물</span>
                   </div>
                 </div>
               </div>
             ) : (
               <div className="bg-white/5 border border-white/5 rounded-[2.5rem] p-10 mb-12 text-center">
-                <p className="text-slate-500 italic">AI 심층 분석이 진행 중인 매물입니다.</p>
+                <p className="text-slate-500 italic">AI 심층 수익성 분석이 진행 중인 매물입니다.</p>
               </div>
             )}
 
@@ -268,20 +269,30 @@ export default function ItemDetail() {
 
               <button 
                 onClick={() => {
-                  const pbctCdtnNo = item.raw_data.pbctCdtnNo;
-                  const url = `https://www.onbid.co.kr/op/cta/cltrdtl/collateralDetailInfo.do?cltrMngNo=${item.cltr_mng_no}${pbctCdtnNo ? `&pbctCdtnNo=${pbctCdtnNo}` : ""}`;
+                  const raw = item.raw_data;
+                  
+                  // 온비드 동산 매물 상세 페이지의 풀 파라미터 조합
+                  // 사용자님이 제공해주신 주소 체계를 100% 반영합니다.
+                  const baseUrl = "https://www.onbid.co.kr/op/cltrpbancinf/cltrdtl/CltrDtlController/mvmnCltrDtl.do";
+                  const params = new URLSearchParams({
+                    cltrScrnGrpCd: "0003",
+                    cltrPrptDivCd: raw.prptDivCd || "0007",
+                    onbidCltrno: raw.onbidCltrno,
+                    onbidPbancNo: raw.onbidPbancNo,
+                    pbctNo: raw.pbctNo,
+                    pbctCdtnNo: raw.pbctCdtnNo
+                  });
+                  
+                  const url = `${baseUrl}?${params.toString()}`;
                   window.open(url, "_blank");
                 }}
-                className="w-full py-5 bg-white text-black rounded-[1.5rem] font-black text-lg hover:bg-indigo-500 hover:text-white transition-all shadow-xl hover:shadow-indigo-500/20 active:scale-[0.98] mb-4"
+                className="w-full py-5 bg-gradient-to-r from-emerald-500 to-indigo-600 text-white rounded-[1.5rem] font-black text-lg hover:brightness-110 transition-all shadow-xl shadow-emerald-500/20 active:scale-[0.98] mb-4"
               >
-                온비드에서 입찰하기
-              </button>
-              <button className="w-full py-5 bg-white/5 text-white border border-white/10 rounded-[1.5rem] font-black text-sm hover:bg-white/10 transition-all">
-                관심 물건 저장
+                온비드 입찰하러 가기
               </button>
               
               <p className="mt-6 text-[10px] text-slate-500 text-center leading-relaxed font-medium">
-                * 본 분석 결과는 AI의 추정치이며, 입찰 전 반드시 <br/>현장을 방문하여 실물 상태를 확인하시기 바랍니다.
+                * 본 분석 리포트는 AI의 추정치이며, 입찰 전 반드시 <br/>현장을 방문하여 실물 상태를 확인하시기 바랍니다.
               </p>
             </div>
           </div>
@@ -290,3 +301,4 @@ export default function ItemDetail() {
     </div>
   );
 }
+

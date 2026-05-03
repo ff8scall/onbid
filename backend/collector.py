@@ -13,12 +13,10 @@ DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'pbid_local.db')
 
 # 분류 키워드
 CATEGORIES = {
-    '데스크탑': ['컴퓨터', '데스크탑', '본체', '워크스테이션', 'PC'],
-    '노트북': ['노트북', '랩탑', '맥북', '그램', '서피스', 'Laptop', 'Macbook'],
-    '휴대폰': ['휴대폰', '스마트폰', '아이폰', '갤럭시', '핸드폰', 'iPhone', 'Galaxy'],
-    '태블릿': ['태블릿', '아이패드', '갤럭시탭', 'iPad', 'Galaxy Tab', '태블릿PC'],
-    '모니터': ['모니터', '디스플레이', 'Monitor'],
-    '부품/주변기기': ['그래픽카드', 'GPU', 'RTX', 'RAM', 'SSD', 'CPU', '메모리', '하드디스크', '키보드', '마우스']
+    '전자기기': ['컴퓨터', '데스크탑', '본체', '노트북', '랩탑', '맥북', '그램', '휴대폰', '스마트폰', '아이폰', '갤럭시', '태블릿', '아이패드', '모니터', 'GPU', '애플', 'APPLE'],
+    '명품': ['가방', '시계', '롤렉스', '샤넬', '에르메스', '루이비통', '구찌', '프라다', 'ROLEX', 'CHANEL', '명품'],
+    '귀금속': ['순금', '14K', '18K', '24K', '금반지', '금목걸이', '골드바', '다이아', '귀금속'],
+    '상품권': ['상품권', '기프트카드', '문화상품권', '백화점상품권', '신세계', '롯데', '국민관광']
 }
 
 def classify_item(name):
@@ -27,7 +25,7 @@ def classify_item(name):
     for cat, keywords in CATEGORIES.items():
         for kw in keywords:
             if kw.upper() in name_upper:
-                return "IT/장비", cat
+                return "환금성자산", cat
     return "기타", "미분류"
 
 def parse_xml_to_dict_list(xml_content):
@@ -49,8 +47,8 @@ import time
 from urllib.parse import quote
 
 def search_it_items():
-    """신규 동산 목록 API를 사용하여 IT 관련 매물 검색 및 저장 (XML 우회 방식)"""
-    search_keywords = ["노트북", "컴퓨터", "PC", "휴대폰", "아이폰", "갤럭시", "모니터", "태블릿", "서버", "워크스테이션"]
+    """신규 동산 목록 API를 사용하여 타겟 매물 검색 및 저장"""
+    search_keywords = ["노트북", "맥북", "아이폰", "아이패드", "갤럭시", "명품", "가방", "시계", "롤렉스", "샤넬", "순금", "14K", "18K", "골드바", "상품권"]
     
     conn = sqlite3.connect(DB_PATH, timeout=20) # DB Lock 방지 타임아웃 추가
     cursor = conn.cursor()
