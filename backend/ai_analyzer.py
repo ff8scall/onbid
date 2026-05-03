@@ -14,9 +14,9 @@ NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY")
 NVIDIA_BASE_URL = os.getenv("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1")
 DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'pbid_local.db')
 
-# 모델 설정
+# 모델 설정: AI Engine (NVIDIA NIM) - Maverick & Flash 모두 Llama 3.1 8B로 단일화
 MAVERICK_MODEL = "meta/llama-3.1-8b-instruct"
-FLASH_MODEL = "stepfun-ai/step-3.5-flash"
+FLASH_MODEL = "meta/llama-3.1-8b-instruct"
 
 # NVIDIA NIM 클라이언트 초기화
 step_client = None
@@ -69,7 +69,7 @@ Return a JSON object with a key "selected_ids" containing a list of objects.
 # Stage 2: Flash Deep Dive Prompt
 FLASH_DEEP_DIVE_PROMPT = """
 **Role:** You are a senior investment analyst specializing in physical asset arbitrage.
-**Task:** Perform a "Deep Dive" analysis on this high-potential item.
+**Task:** Perform a "Deep Dive" analysis on this high-potential item and provide the report in KOREAN.
 
 **Item Data:**
 - Name: {item_name}
@@ -80,7 +80,7 @@ FLASH_DEEP_DIVE_PROMPT = """
 **Instructions:**
 1. **Real-time Price Estimation**: Estimate current resale value based on 2026 market trends.
 2. **Risk Analysis**: Identify any "Toxic Clauses" in the detail text (e.g., hidden defects, pickup constraints).
-3. **Copywriting**: Write a 3-line attractive summary for resellers.
+3. **Copywriting**: Write a 3-line attractive summary for resellers (Must be in KOREAN).
 4. **Final Scoring**: Provide a score from 0-100.
 
 **Output Format (Strictly JSON):**
@@ -89,7 +89,7 @@ FLASH_DEEP_DIVE_PROMPT = """
   "expected_profit": 0,
   "margin_percent": 0.0,
   "risk_factors": ["risk1", "risk2"],
-  "three_line_summary": "Attractive summary here",
+  "three_line_summary": "매력적인 3줄 요약 (한국어)",
   "investment_score": 0,
   "pickup_difficulty": "Low/Medium/High"
 }}
@@ -126,7 +126,7 @@ def get_maverick_batch_analysis(items_list):
         return []
 
 def get_flash_deep_dive(item, detail_text):
-    """Stepfun 3.5 Flash를 사용한 2차 정밀 분석"""
+    """Llama 3.1 8B를 사용한 2차 정밀 분석"""
     fallback_res = {
         "investment_score": 0, "expected_profit": 0, "margin_percent": 0, 
         "pickup_method": "정보없음", "pickup_difficulty": "Unknown", 
@@ -135,9 +135,12 @@ def get_flash_deep_dive(item, detail_text):
     
     if not step_client: return fallback_res
     
+    # 상세 설명이 없을 경우에 대한 처리 강화
+    detail_content = clean_text(detail_text)[:4000] if detail_text else "상세 설명 데이터가 제공되지 않았습니다. 물건 명칭과 주소를 바탕으로 일반적인 가치를 추정하십시오."
+    
     prompt = FLASH_DEEP_DIVE_PROMPT.format(
         item_name=item['onbid_cltr_nm'],
-        detail_text=clean_text(detail_text)[:4000], # Stepfun은 컨텍스트가 넉넉함
+        detail_text=detail_content,
         min_bid_price=item['min_bid_prc'],
         address=item['cltr_adr']
     )
@@ -146,6 +149,7 @@ def get_flash_deep_dive(item, detail_text):
         response = step_client.chat.completions.create(
             model=FLASH_MODEL,
             messages=[{"role": "user", "content": prompt}],
+            response_format={"type": "json_object"},
             temperature=0
         )
         text = response.choices[0].message.content
@@ -181,7 +185,7 @@ def pre_filter(item):
     return True, "Passed"
 
 def run_pipeline():
-    """깔때기형 파이프라인 실행"""
+    """Llama 3.1 8B 단일 모델 기반 깔때기형 파이프라인 실행"""
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
@@ -230,7 +234,7 @@ def run_pipeline():
         time.sleep(6.5) # Rate limit 준수 (10 RPM)
 
     # Stage 2: Flash Deep Dive (정예 매물 대상)
-    print(f"[*] {len(selected_by_maverick)}건 정예 매물 Deep Dive(Stage 2: Stepfun Flash) 가동...", flush=True)
+    print(f"[*] {len(selected_by_maverick)}건 정예 매물 Deep Dive(Stage 2: Llama 8B) 가동...", flush=True)
     for item in selected_by_maverick:
         detail_text = get_item_detail_text(item['pbanc_mng_no'], item['cltr_mng_no'])
         analysis = get_flash_deep_dive(item, detail_text)

@@ -6,9 +6,9 @@
 ## 2. 기술 스택
 - **Backend**: Python (FastAPI), SQLite3
 - **Frontend**: Next.js (App Router), TailwindCSS
-- **AI Engine**: 
-  - **Maverick (NVIDIA NIM)**: Stage 1 광역 필터링 (`meta/llama-3.1-8b-instruct`)
-  - **Flash (NVIDIA NIM)**: Stage 2 정밀 분석 (`stepfun-ai/step-3.5-flash`)
+- **AI Engine (NVIDIA NIM)**: 
+  - **Maverick & Flash**: `meta/llama-3.1-8b-instruct`로 모델 단일화.
+  - 고속 배치 필터링 및 정밀 분석을 동일 모델로 수행하여 일관성 확보.
 - **External API**: 온비드 공공데이터 API (동산 목록/상세)
 
 ## 3. AI 분석 파이프라인 (Funnel Architecture)
