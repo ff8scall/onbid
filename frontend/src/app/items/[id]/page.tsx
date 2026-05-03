@@ -8,7 +8,7 @@ interface OnbidItem {
   cltr_mng_no: string;
   onbid_cltr_nm: string;
   cltr_adr: string;
-  min_bid_prc: number;
+  min_bid_prc: number | string;
   sub_category: string;
   thumb_url?: string;
   created_at: string;
@@ -63,7 +63,7 @@ export default function ItemDetail({ params }: { params: { id: string } }) {
     ...itemsData.target,
     ...itemsData.candidate,
     ...itemsData.substandard
-  ];
+  ] as any[];
   const item = allItems.find((i) => i.id.toString() === params.id) as OnbidItem;
 
   if (!item) notFound();

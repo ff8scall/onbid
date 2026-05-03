@@ -9,7 +9,7 @@ interface OnbidItem {
   pbanc_mng_no: string;
   onbid_cltr_nm: string;
   cltr_adr: string;
-  min_bid_prc: number;
+  min_bid_prc: number | string;
   sub_category: string;
   ai_score: number;
   ai_expected_profit: number;
