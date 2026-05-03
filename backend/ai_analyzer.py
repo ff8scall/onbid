@@ -35,7 +35,7 @@ if HAS_GENAI and GEMINI_API_KEY and GEMINI_API_KEY != "your_api_key_here":
     try:
         genai.configure(api_key=GEMINI_API_KEY)
         model = genai.GenerativeModel(
-            "gemini-1.5-flash",
+            "models/gemini-1.5-flash",
             generation_config={"response_mime_type": "application/json"}
         )
     except Exception as e:
