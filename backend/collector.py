@@ -90,7 +90,7 @@ def search_it_items():
                             min_bid_prc, main_category, sub_category, thumb_url, bid_end_date, raw_data
                         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ''', (
-                        str(item.get('onbidPbancNo')), 
+                        item.get('pbancMngNo'), 
                         item.get('cltrMngNo'),
                         cltr_nm,
                         f"{item.get('lctnSdnm', '')} {item.get('lctnSggnm', '')} {item.get('lctnEmdNm', '')}",
