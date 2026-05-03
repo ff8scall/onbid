@@ -38,9 +38,9 @@ def export_to_json():
             if item.get('raw_data'):
                 item['raw_data'] = json.loads(item['raw_data'])
     
-    # 카테고리 추출 (정예 매물 기준)
-    cursor.execute("SELECT DISTINCT sub_category FROM onbid_items WHERE main_category = '환금성자산' AND is_target_item = 1 AND is_substandard = 0 AND is_expired = 0")
-    categories = [row[0] for row in cursor.fetchall()]
+    # 카테고리 추출 (정예 + 후보 매물 기준)
+    cursor.execute("SELECT DISTINCT sub_category FROM onbid_items WHERE main_category = '환금성자산' AND (is_target_item = 1 OR is_maverick_selected = 1) AND is_substandard = 0 AND is_expired = 0")
+    categories = [row[0] for row in cursor.fetchall() if row[0] != '미분류']
     
     data = {
         "target": target_items,

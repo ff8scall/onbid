@@ -7,8 +7,8 @@
 - **Backend**: Python (FastAPI), SQLite3
 - **Frontend**: Next.js (App Router), TailwindCSS
 - **AI Engine**: 
-  - **Maverick (NVIDIA NIM)**: Stage 1 광역 필터링 (배치 처리)
-  - **Flash (Gemini 1.5)**: Stage 2 정밀 분석 및 리포트 생성
+  - **Maverick (NVIDIA NIM)**: Stage 1 광역 필터링 (`meta/llama-3.1-8b-instruct`)
+  - **Flash (NVIDIA NIM)**: Stage 2 정밀 분석 (`stepfun-ai/step-3.5-flash`)
 - **External API**: 온비드 공공데이터 API (동산 목록/상세)
 
 ## 3. AI 분석 파이프라인 (Funnel Architecture)

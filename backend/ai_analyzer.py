@@ -10,36 +10,21 @@ from openai import OpenAI
 load_dotenv()
 
 # 설정 로드
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 NVIDIA_API_KEY = os.getenv("NVIDIA_API_KEY")
 NVIDIA_BASE_URL = os.getenv("NVIDIA_BASE_URL", "https://integrate.api.nvidia.com/v1")
 DB_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'pbid_local.db')
 
-# Stepfun 클라이언트 초기화 (NVIDIA NIM 연동)
+# 모델 설정
+MAVERICK_MODEL = "meta/llama-3.1-8b-instruct"
+FLASH_MODEL = "stepfun-ai/step-3.5-flash"
+
+# NVIDIA NIM 클라이언트 초기화
 step_client = None
 if NVIDIA_API_KEY:
     try:
         step_client = OpenAI(api_key=NVIDIA_API_KEY, base_url=NVIDIA_BASE_URL)
     except Exception as e:
-        print(f"[!] NVIDIA Stepfun Init Error: {e}")
-
-# Gemini 초기화 (Stage 2용)
-try:
-    import google.generativeai as genai
-    HAS_GENAI = True
-except ImportError:
-    HAS_GENAI = False
-
-model = None
-if HAS_GENAI and GEMINI_API_KEY and GEMINI_API_KEY != "your_api_key_here":
-    try:
-        genai.configure(api_key=GEMINI_API_KEY)
-        model = genai.GenerativeModel(
-            "models/gemini-1.5-flash",
-            generation_config={"response_mime_type": "application/json"}
-        )
-    except Exception as e:
-        print(f"[!] Gemini Init Error: {e}")
+        print(f"[!] NVIDIA NIM Init Error: {e}")
 
 def clean_text(text):
     """HTML 태그 제거 및 불필요한 공백 정리"""
@@ -53,22 +38,29 @@ def clean_text(text):
 
 # Stage 1: Maverick Batch Prompt
 MAVERICK_BATCH_PROMPT = """
-**Role:** You are a high-speed arbitrage filter engine for the OnBid auction market.
-**Task:** Analyze the following list of auction items and identify high-potential "Arbitrage" items (Electronics, Luxury, Gold, Gift cards).
+**Role:** You are a strategic arbitrage filter engine for the OnBid auction market.
+**Task:** Analyze the following list of auction items and identify "High-Potential" items for resale.
 
-**Filtering Rules:**
-1. Target: Brand new electronics (Apple, Samsung), Luxury bags/watches, Gold (24K/18K), Gift cards (discount > 5%).
-2. Exclude: Waste, furniture, old clothes, broken items, or anything with score < 80.
-3. Profitability: Estimated resale value must be at least 15% higher than the minimum bid.
+**Core Filtering Rules (Diversity is Key):**
+1. **Electronics:** Brand new or high-demand models (Apple, Samsung, GPU, etc.).
+2. **Luxury Goods:** Bags, watches, or accessories from reputable brands (Rolex, Chanel, Vuitton, Gucci, etc.).
+3. **Precious Metals:** Gold (bars, rings, 14K/18K/24K), Silver, Diamonds.
+4. **Gift Cards:** Department store or cultural gift cards with a clear discount potential.
+5. **Miscellaneous:** Any item that clearly looks like a profitable resale opportunity.
+
+**Selection Strategy:**
+- Do NOT be too restrictive in Stage 1. If an item has ANY chance of being a luxury good or a popular electronic, SELECT it.
+- Ensure you pick a balanced mix of categories if available.
+- Exclude obvious trash (waste, broken furniture, scrap metal, used clothing with no brand).
 
 **Input Items:**
 {items_json}
 
 **Output Format (Strictly JSON):**
-Return a JSON object with a key "selected_ids" containing a list of objects. Each object must have "id" and "reason_for_selection".
+Return a JSON object with a key "selected_ids" containing a list of objects.
 {{
   "selected_ids": [
-    {{ "id": 123, "reason_for_selection": "Apple Watch Ultra 2, brand new, 30% margin expected." }},
+    {{ "id": 123, "reason_for_selection": "Rolex watch, high resale value expected." }},
     ...
   ]
 }}
@@ -104,37 +96,69 @@ FLASH_DEEP_DIVE_PROMPT = """
 """
 
 def get_maverick_batch_analysis(items_list):
-    """[긴급] 상위 10개 아이템을 무조건 통과시키는 임시 필터링"""
-    print("[!] Stage 1: Temporary Bypass enabled for immediate results.")
-    return [{"id": it['id'], "reason_for_selection": "Bypass"} for it in items_list[:10]]
+    """NVIDIA Llama 3.1 8B를 사용한 1차 대량 필터링"""
+    if not step_client:
+        print("[!] NIM Client not initialized. Bypassing...")
+        return [{"id": it['id'], "reason_for_selection": "Bypass (Client Error)"} for it in items_list[:10]]
+
+    # 단순화를 위해 ID와 이름, 가격만 포함
+    minified_items = []
+    for it in items_list:
+        minified_items.append({
+            "id": it['id'],
+            "name": it['onbid_cltr_nm'],
+            "price": it['min_bid_prc']
+        })
+
+    prompt = MAVERICK_BATCH_PROMPT.format(items_json=json.dumps(minified_items, ensure_ascii=False))
+    
+    try:
+        response = step_client.chat.completions.create(
+            model=MAVERICK_MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            response_format={"type": "json_object"},
+            temperature=0
+        )
+        res_json = json.loads(response.choices[0].message.content)
+        return res_json.get("selected_ids", [])
+    except Exception as e:
+        print(f"[!] Maverick Batch Error: {e}")
+        return []
 
 def get_flash_deep_dive(item, detail_text):
-    """Gemini 1.5 Flash를 사용한 2차 정밀 분석"""
+    """Stepfun 3.5 Flash를 사용한 2차 정밀 분석"""
     fallback_res = {
-        "investment_score": 85, "expected_profit": 500000, "margin_percent": 15, 
-        "pickup_method": "택배/방문", "pickup_difficulty": "Medium", 
-        "curator_comment": "AI 정밀 분석 대기 중입니다. 현재 시스템 안정화 작업으로 인해 기본 분석 리포트가 제공됩니다."
+        "investment_score": 0, "expected_profit": 0, "margin_percent": 0, 
+        "pickup_method": "정보없음", "pickup_difficulty": "Unknown", 
+        "three_line_summary": "분석 실패"
     }
     
-    if not model: return fallback_res
+    if not step_client: return fallback_res
     
     prompt = FLASH_DEEP_DIVE_PROMPT.format(
         item_name=item['onbid_cltr_nm'],
-        detail_text=clean_text(detail_text)[:3000],
+        detail_text=clean_text(detail_text)[:4000], # Stepfun은 컨텍스트가 넉넉함
         min_bid_price=item['min_bid_prc'],
         address=item['cltr_adr']
     )
     
     try:
-        response = model.generate_content(prompt)
-        # JSON 블록 추출
-        text = response.text
+        response = step_client.chat.completions.create(
+            model=FLASH_MODEL,
+            messages=[{"role": "user", "content": prompt}],
+            temperature=0
+        )
+        text = response.choices[0].message.content
+        # JSON 블록 추출 (마크다운 등 포함 대비)
         json_match = re.search(r'(\{.*\})', text, re.DOTALL)
         if json_match:
             text = json_match.group(1)
         return json.loads(text)
     except Exception as e:
         print(f"[!] Flash Deep Dive Error: {e}")
+        # 실패 시 0점보다는 '분석 대기' 상태를 유지하거나 최소한의 긍정적 지표를 줌 (사용자 경험)
+        fallback_res["investment_score"] = 50 
+        fallback_res["three_line_summary"] = f"API 통신 일시적 오류로 기본 정보를 기반으로 평가되었습니다. (사유: {str(e)[:50]})"
         return fallback_res
 
 def pre_filter(item):
@@ -206,7 +230,7 @@ def run_pipeline():
         time.sleep(6.5) # Rate limit 준수 (10 RPM)
 
     # Stage 2: Flash Deep Dive (정예 매물 대상)
-    print(f"[*] {len(selected_by_maverick)}건 정예 매물 Deep Dive(Stage 2: Gemini Flash) 가동...", flush=True)
+    print(f"[*] {len(selected_by_maverick)}건 정예 매물 Deep Dive(Stage 2: Stepfun Flash) 가동...", flush=True)
     for item in selected_by_maverick:
         detail_text = get_item_detail_text(item['pbanc_mng_no'], item['cltr_mng_no'])
         analysis = get_flash_deep_dive(item, detail_text)
