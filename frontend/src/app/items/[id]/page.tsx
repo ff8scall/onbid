@@ -177,18 +177,18 @@ export default function ItemDetail({ params }: { params: { id: string } }) {
                       <div className="bg-black/20 rounded-2xl p-6 border border-white/5 space-y-4">
                         <div className="flex justify-between items-center">
                           <span className="text-slate-500 text-xs">추정 시장가</span>
-                          <span className="text-white font-bold">{item.ai_resale_value?.toLocaleString()}원</span>
+                          <span className="text-white font-bold">{item.ai_resale_value?.toLocaleString() ?? "0"}원</span>
                         </div>
                         <div className="flex justify-between items-center text-red-400">
                           <span className="text-slate-500 text-xs">입찰가(비용)</span>
-                          <span className="font-bold">-{item.min_bid_prc.toLocaleString()}원</span>
+                          <span className="font-bold">-{Number(item.min_bid_prc).toLocaleString()}원</span>
                         </div>
                         <div className="pt-4 border-t border-white/5 flex justify-between items-center">
                           <span className="text-emerald-400 font-black">예상 순수익</span>
-                          <span className="text-emerald-400 text-2xl font-black">+{item.ai_expected_profit.toLocaleString()}원</span>
+                          <span className="text-emerald-400 text-2xl font-black">+{item.ai_expected_profit?.toLocaleString() ?? "0"}원</span>
                         </div>
                         <div className="text-right text-[10px] text-emerald-500/60 font-bold uppercase tracking-widest">
-                          ROI: {item.ai_margin_percent.toFixed(1)}%
+                          ROI: {item.ai_margin_percent?.toFixed(1) ?? "0.0"}%
                         </div>
                       </div>
                     </div>
@@ -200,11 +200,11 @@ export default function ItemDetail({ params }: { params: { id: string } }) {
                       <div className="bg-amber-500/5 rounded-2xl p-6 border border-amber-500/10">
                         <div className="flex items-center justify-between mb-2">
                           <span className="text-slate-400 text-xs font-bold uppercase">수령 방식</span>
-                          <span className="text-white font-bold">{item.ai_pickup_method}</span>
+                          <span className="text-white font-bold">{item.ai_pickup_method ?? "정보 없음"}</span>
                         </div>
                         <div className="flex items-center justify-between">
                           <span className="text-slate-400 text-xs font-bold uppercase">난이도 등급</span>
-                          <span className={`font-black ${getDifficultyColor(item.ai_difficulty)}`}>{item.ai_difficulty}</span>
+                          <span className={`font-black ${getDifficultyColor(item.ai_difficulty ?? "Medium")}`}>{item.ai_difficulty ?? "Medium"}</span>
                         </div>
                       </div>
                     </div>

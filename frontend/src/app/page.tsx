@@ -148,13 +148,13 @@ export default function Dashboard() {
                           <span className="px-3 py-1 bg-black/60 backdrop-blur-md text-white/70 text-[9px] font-black rounded-lg border border-white/10 uppercase tracking-widest">
                             {item.sub_category}
                           </span>
-                          <span className={`px-3 py-1 backdrop-blur-md text-[9px] font-black rounded-lg border uppercase tracking-widest ${getDifficultyColor(item.ai_difficulty)}`}>
-                            {item.ai_pickup_method}
+                          <span className={`px-3 py-1 backdrop-blur-md text-[9px] font-black rounded-lg border uppercase tracking-widest ${getDifficultyColor(item.ai_difficulty ?? "Medium")}`}>
+                            {item.ai_pickup_method ?? "정보 없음"}
                           </span>
                         </div>
                         <div className="absolute top-4 right-4">
-                          <div className={`px-3 py-1.5 rounded-lg border font-black text-[10px] backdrop-blur-md ${getScoreColor(item.ai_score)}`}>
-                            SCORE <span className="ml-1 text-sm">{item.ai_score}</span>
+                          <div className={`px-3 py-1.5 rounded-lg border font-black text-[10px] backdrop-blur-md ${getScoreColor(item.ai_score ?? 0)}`}>
+                            SCORE <span className="ml-1 text-sm">{item.ai_score ?? 0}</span>
                           </div>
                         </div>
                       </div>
