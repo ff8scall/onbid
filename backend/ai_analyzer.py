@@ -104,8 +104,8 @@ FLASH_DEEP_DIVE_PROMPT = """
 """
 
 def get_maverick_batch_analysis(items_list):
-    """Maverick(NVIDIA NIM)을 사용한 1차 광역 필터링 (배치 처리)"""
-    if not step_client: return []
+    """Gemini 1.5 Flash를 사용한 1차 광역 필터링 (배치 처리)"""
+    if not model: return []
     
     formatted_items = []
     for item in items_list:
@@ -119,26 +119,17 @@ def get_maverick_batch_analysis(items_list):
     prompt = MAVERICK_BATCH_PROMPT.format(items_json=json.dumps(formatted_items, ensure_ascii=False))
     
     try:
-        response = step_client.chat.completions.create(
-            model="stepfun-ai/step-3.5-flash",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.3, # 필터링이므로 정교함보다 일관성 중시
-            response_format={"type": "json_object"}
-        )
-        content = response.choices[0].message.content
-        if not content:
-            print("[!] Maverick Batch Error: Empty response content")
-            return []
-            
-        # JSON 블록 추출 시도
-        json_match = re.search(r'(\{.*\})', content, re.DOTALL)
+        response = model.generate_content(prompt)
+        text = response.text
+        # JSON 블록 추출
+        json_match = re.search(r'(\{.*\})', text, re.DOTALL)
         if json_match:
-            content = json_match.group(1)
+            text = json_match.group(1)
             
-        result = json.loads(content)
+        result = json.loads(text)
         return result.get("selected_ids", [])
     except Exception as e:
-        print(f"[!] Maverick Batch Error: {e}")
+        print(f"[!] Stage 1 Filter Error (Gemini): {e}")
         return []
 
 def get_flash_deep_dive(item, detail_text):
