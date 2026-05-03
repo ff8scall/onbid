@@ -12,18 +12,18 @@
 - **External API**: 온비드 공공데이터 API (동산 목록/상세)
 
 ## 3. AI 분석 파이프라인 (Funnel Architecture)
-1. **Stage 0 (Rule-base)**: 블랙리스트 키워드 필터링 및 텍스트 전처리(HTML 제거).
-2. **Stage 1 (Maverick)**: 50개 단위 배치 처리로 고수익 후보군(is_maverick_selected) 선별.
-3. **Stage 2 (Flash)**: 선별된 정예 매물 대상 정밀 분석 및 외부 시세 검증 리포트 생성.
+1. **Stage 0 (Rule-base Filter)**: 블랙리스트 키워드 필터링 및 텍스트 전처리.
+2. **Stage 1 (Maverick Filtering)**: Llama 8B 배치 분석을 통한 고수익 후보군 선별.
+3. **Stage 1.5 (Selective Classifier)**: 정규식 및 텍스트 분석을 통한 '단건' vs '일괄' vs '정보부족' 판별.
+4. **Stage 2 (Deep Dive)**: 단건 매물 대상 심층 수익성 분석 및 한국어 리포트 생성 (보류 건은 API 호출 생략).
 
 ## 4. 핵심 데이터 로직
-- **Arbitrage Calculation**: `(추정 시장가 - 최저입찰가) = 예상 수익금`
-- **Filtering**: 투자 점수 60점 미만 또는 비타겟 매물은 `is_substandard` 플래그 보관.
+- **Selective Hold**: 분석 데이터가 부족하거나 일괄 매각 건은 `ai_difficulty = 'Hold'`로 분류하여 리포트 신뢰도 보호.
+- **Financial Analysis**: `(추정 시장가 - (입찰가 + 부대비용)) = 예상 순수익` 기반의 보수적 스코어링.
 
 ## 5. 디렉토리 구조
 - `/backend`: 수집 및 AI 분석 파이프라인
-  - `collector.py`: 타겟 키워드 기반 매물 수집기
-  - `ai_analyzer.py`: Maverick -> Flash 깔때기 분석 엔진
-  - `main.py`: 수익성 데이터 서빙 API
-- `/frontend`: 리셀러 특화 대시보드
-  - `src/app/page.tsx`: 정예/후보/미달 탭 기반 큐레이션 보드
+  - `collector.py`: 신규 매물 수집 및 상세 정보 사전 캐싱
+  - `ai_analyzer.py`: Maverick -> Classifier -> Deep Dive 엔진
+  - `export_data.py`: 프론트엔드용 JSON 익스포터
+- `/frontend`: 리셀러 특화 대시보드 (SSG 아키텍처)
