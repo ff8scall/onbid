@@ -1287,7 +1287,7 @@
       "is_expired": 0
     },
     {
-      "id": 2556,
+      "id": 2747,
       "pbanc_mng_no": "885224",
       "cltr_mng_no": "2026-0400-020914",
       "onbid_cltr_nm": "노트북컴퓨터, (OEM)엘지전자, CN/15UG480-KP5SKN, Intel Core i5 8250U(1.6GHz)",
@@ -1370,7 +1370,7 @@
         "pbctStatCd": "0002",
         "pbctStatNm": "입찰진행중"
       },
-      "created_at": "2026-05-03 06:43:22",
+      "created_at": "2026-05-03 06:44:18",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -1394,7 +1394,7 @@
       "is_expired": 0
     },
     {
-      "id": 2561,
+      "id": 2752,
       "pbanc_mng_no": "883328",
       "cltr_mng_no": "2026-0400-020802",
       "onbid_cltr_nm": "주식회사 큐브엑스 유형자산 일체(컴퓨터, 노트북, 가전제품 등) 매각공고",
@@ -1477,7 +1477,7 @@
         "pbctStatCd": "0001",
         "pbctStatNm": "입찰준비중"
       },
-      "created_at": "2026-05-03 06:43:22",
+      "created_at": "2026-05-03 06:44:18",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -1501,7 +1501,7 @@
       "is_expired": 0
     },
     {
-      "id": 2565,
+      "id": 2756,
       "pbanc_mng_no": "883591",
       "cltr_mng_no": "2026-0400-021186",
       "onbid_cltr_nm": "호라이존테크놀로지(주) 유형자산(노트북 등)",
@@ -1584,7 +1584,7 @@
         "pbctStatCd": "0001",
         "pbctStatNm": "입찰준비중"
       },
-      "created_at": "2026-05-03 06:43:22",
+      "created_at": "2026-05-03 06:44:18",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -1608,7 +1608,7 @@
       "is_expired": 0
     },
     {
-      "id": 2568,
+      "id": 2759,
       "pbanc_mng_no": "885185",
       "cltr_mng_no": "2026-0400-023084",
       "onbid_cltr_nm": "(주)어썸잇 유형자산(노트북)/LG그램",
@@ -1691,7 +1691,7 @@
         "pbctStatCd": "0001",
         "pbctStatNm": "입찰준비중"
       },
-      "created_at": "2026-05-03 06:43:22",
+      "created_at": "2026-05-03 06:44:18",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -1715,7 +1715,7 @@
       "is_expired": 0
     },
     {
-      "id": 2585,
+      "id": 2776,
       "pbanc_mng_no": "885110",
       "cltr_mng_no": "2026-01266-010",
       "onbid_cltr_nm": "대전광역시 대덕구 법동 282-1 대전지방국세청 보관 버버리가방 1점",
@@ -1798,7 +1798,7 @@
         "pbctStatCd": "0001",
         "pbctStatNm": "입찰준비중"
       },
-      "created_at": "2026-05-03 06:43:30",
+      "created_at": "2026-05-03 06:44:31",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -1822,7 +1822,7 @@
       "is_expired": 0
     },
     {
-      "id": 2593,
+      "id": 2784,
       "pbanc_mng_no": "885110",
       "cltr_mng_no": "2026-01266-005",
       "onbid_cltr_nm": "대전광역시 대덕구 법동 282-1  대전지방국세청보관 루이비통가방 1점",
@@ -1905,7 +1905,7 @@
         "pbctStatCd": "0001",
         "pbctStatNm": "입찰준비중"
       },
-      "created_at": "2026-05-03 06:43:30",
+      "created_at": "2026-05-03 06:44:31",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -1929,7 +1929,7 @@
       "is_expired": 0
     },
     {
-      "id": 2605,
+      "id": 2796,
       "pbanc_mng_no": "885110",
       "cltr_mng_no": "2026-01266-013",
       "onbid_cltr_nm": "대전광역시 대덕구 법동 282-1 대전지방국세청 보관 구찌가방 2점",
@@ -2012,7 +2012,7 @@
         "pbctStatCd": "0001",
         "pbctStatNm": "입찰준비중"
       },
-      "created_at": "2026-05-03 06:43:30",
+      "created_at": "2026-05-03 06:44:31",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -2036,7 +2036,7 @@
       "is_expired": 0
     },
     {
-      "id": 2607,
+      "id": 2798,
       "pbanc_mng_no": "868614",
       "cltr_mng_no": "2025-04737-001",
       "onbid_cltr_nm": "서울특별시 관악구 신림동 438-2 관악세무서  체납징세과 보관 남성가방(루이비통) 1점",
@@ -2119,7 +2119,7 @@
         "pbctStatCd": "0001",
         "pbctStatNm": "입찰준비중"
       },
-      "created_at": "2026-05-03 06:43:30",
+      "created_at": "2026-05-03 06:44:31",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -2143,7 +2143,7 @@
       "is_expired": 0
     },
     {
-      "id": 2609,
+      "id": 2800,
       "pbanc_mng_no": "885110",
       "cltr_mng_no": "2026-01266-008",
       "onbid_cltr_nm": "대전광역시 대덕구 법동 282-1  대전지방국세청 보관 구찌가방 1점",
@@ -2226,7 +2226,7 @@
         "pbctStatCd": "0001",
         "pbctStatNm": "입찰준비중"
       },
-      "created_at": "2026-05-03 06:43:30",
+      "created_at": "2026-05-03 06:44:31",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -2250,7 +2250,7 @@
       "is_expired": 0
     },
     {
-      "id": 2610,
+      "id": 2801,
       "pbanc_mng_no": "885110",
       "cltr_mng_no": "2026-01266-007",
       "onbid_cltr_nm": "대전광역시 대덕구 법동 282-1 대전지방국세청 보관 구찌가방 1점",
@@ -2333,7 +2333,7 @@
         "pbctStatCd": "0001",
         "pbctStatNm": "입찰준비중"
       },
-      "created_at": "2026-05-03 06:43:30",
+      "created_at": "2026-05-03 06:44:31",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -2357,7 +2357,7 @@
       "is_expired": 0
     },
     {
-      "id": 2611,
+      "id": 2802,
       "pbanc_mng_no": "885110",
       "cltr_mng_no": "2026-01266-009",
       "onbid_cltr_nm": "대전광역시 대덕구 법동 282-1 대전지방국세청 보관 구찌가방 1점",
@@ -2440,7 +2440,7 @@
         "pbctStatCd": "0001",
         "pbctStatNm": "입찰준비중"
       },
-      "created_at": "2026-05-03 06:43:30",
+      "created_at": "2026-05-03 06:44:31",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -2464,7 +2464,7 @@
       "is_expired": 0
     },
     {
-      "id": 2616,
+      "id": 2807,
       "pbanc_mng_no": "884941",
       "cltr_mng_no": "2026-0400-022753",
       "onbid_cltr_nm": "귀금속, 시계, 전자제품, 기타제품류",
@@ -2547,7 +2547,7 @@
         "pbctStatCd": "0002",
         "pbctStatNm": "입찰진행중"
       },
-      "created_at": "2026-05-03 06:43:31",
+      "created_at": "2026-05-03 06:44:32",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -2571,7 +2571,7 @@
       "is_expired": 0
     },
     {
-      "id": 2620,
+      "id": 2811,
       "pbanc_mng_no": "866782",
       "cltr_mng_no": "2026-00236-001",
       "onbid_cltr_nm": "대전광역시 대덕구 법동 282-1 대전지방국세청 보관 구찌 시계 2점, 아르마니 시계 1점, 미쉘에블랑 시계 1점",
@@ -2654,7 +2654,7 @@
         "pbctStatCd": "0001",
         "pbctStatNm": "입찰준비중"
       },
-      "created_at": "2026-05-03 06:43:31",
+      "created_at": "2026-05-03 06:44:32",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -2678,7 +2678,7 @@
       "is_expired": 0
     },
     {
-      "id": 2648,
+      "id": 2839,
       "pbanc_mng_no": "885110",
       "cltr_mng_no": "2024-17127-005",
       "onbid_cltr_nm": "대전광역시 대덕구 법동 282-1 대전지방국세청 보관 IWC시계 1점",
@@ -2761,7 +2761,7 @@
         "pbctStatCd": "0001",
         "pbctStatNm": "입찰준비중"
       },
-      "created_at": "2026-05-03 06:43:31",
+      "created_at": "2026-05-03 06:44:32",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -2785,7 +2785,7 @@
       "is_expired": 0
     },
     {
-      "id": 2664,
+      "id": 2855,
       "pbanc_mng_no": "885105",
       "cltr_mng_no": "2026-02124-001",
       "onbid_cltr_nm": "대전광역시 대덕구 법동 282-1 대전지방국세청 내 보관중인 IWC시계 1점, 까르띠에시계 1점",
@@ -2868,7 +2868,7 @@
         "pbctStatCd": "0001",
         "pbctStatNm": "입찰준비중"
       },
-      "created_at": "2026-05-03 06:43:31",
+      "created_at": "2026-05-03 06:44:32",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -2892,7 +2892,7 @@
       "is_expired": 0
     },
     {
-      "id": 2665,
+      "id": 2856,
       "pbanc_mng_no": "885105",
       "cltr_mng_no": "2025-18182-001",
       "onbid_cltr_nm": "서울특별시 종로구 수송동 104 서울지방국세청 금고 내 보관 중인 HERMES 시계 1점",
@@ -2975,7 +2975,7 @@
         "pbctStatCd": "0001",
         "pbctStatNm": "입찰준비중"
       },
-      "created_at": "2026-05-03 06:43:31",
+      "created_at": "2026-05-03 06:44:32",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -2999,7 +2999,7 @@
       "is_expired": 0
     },
     {
-      "id": 2682,
+      "id": 2873,
       "pbanc_mng_no": "882749",
       "cltr_mng_no": "2025-13884-001",
       "onbid_cltr_nm": "대전광역시 대덕구 법동 282-1 대전지방국세청  보관 롤렉스시계 1점",
@@ -3082,7 +3082,7 @@
         "pbctStatCd": "0001",
         "pbctStatNm": "입찰준비중"
       },
-      "created_at": "2026-05-03 06:43:33",
+      "created_at": "2026-05-03 06:44:34",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -3106,7 +3106,7 @@
       "is_expired": 0
     },
     {
-      "id": 2684,
+      "id": 2875,
       "pbanc_mng_no": "885171",
       "cltr_mng_no": "2026-02186-009",
       "onbid_cltr_nm": "대전광역시 대덕구 법동 282-1 대전지방국세청 체납추적과 보관 (롤렉스 시계 1점)",
@@ -3189,7 +3189,7 @@
         "pbctStatCd": "0001",
         "pbctStatNm": "입찰준비중"
       },
-      "created_at": "2026-05-03 06:43:33",
+      "created_at": "2026-05-03 06:44:34",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -3213,7 +3213,7 @@
       "is_expired": 0
     },
     {
-      "id": 2686,
+      "id": 2877,
       "pbanc_mng_no": "884122",
       "cltr_mng_no": "2026-0300-005532",
       "onbid_cltr_nm": "269.6g 순금/ 금 함량(99.9%)",
@@ -3296,7 +3296,7 @@
         "pbctStatCd": "0002",
         "pbctStatNm": "입찰진행중"
       },
-      "created_at": "2026-05-03 06:43:36",
+      "created_at": "2026-05-03 06:44:38",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -3320,7 +3320,7 @@
       "is_expired": 0
     },
     {
-      "id": 2705,
+      "id": 2896,
       "pbanc_mng_no": "885110",
       "cltr_mng_no": "2025-17635-001",
       "onbid_cltr_nm": "대전광역시 대덕구 법동 282-1 대전지방국세청 보관 순금팔찌 1점",
@@ -3403,7 +3403,7 @@
         "pbctStatCd": "0001",
         "pbctStatNm": "입찰준비중"
       },
-      "created_at": "2026-05-03 06:43:36",
+      "created_at": "2026-05-03 06:44:38",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -3427,7 +3427,7 @@
       "is_expired": 0
     },
     {
-      "id": 2706,
+      "id": 2897,
       "pbanc_mng_no": "885110",
       "cltr_mng_no": "2026-01362-005",
       "onbid_cltr_nm": "대전광역시 대덕구 법동 282-1 대전지방국세청보관  순금볼1점",
@@ -3510,7 +3510,7 @@
         "pbctStatCd": "0001",
         "pbctStatNm": "입찰준비중"
       },
-      "created_at": "2026-05-03 06:43:36",
+      "created_at": "2026-05-03 06:44:38",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -3534,7 +3534,7 @@
       "is_expired": 0
     },
     {
-      "id": 2707,
+      "id": 2898,
       "pbanc_mng_no": "885055",
       "cltr_mng_no": "2026-0400-022928",
       "onbid_cltr_nm": " 14K 목걸이 ",
@@ -3617,7 +3617,7 @@
         "pbctStatCd": "0002",
         "pbctStatNm": "입찰진행중"
       },
-      "created_at": "2026-05-03 06:43:37",
+      "created_at": "2026-05-03 06:44:40",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -3641,7 +3641,7 @@
       "is_expired": 0
     },
     {
-      "id": 2713,
+      "id": 2904,
       "pbanc_mng_no": "885055",
       "cltr_mng_no": "2026-0400-022927",
       "onbid_cltr_nm": " 18K 팔찌 ",
@@ -3724,7 +3724,7 @@
         "pbctStatCd": "0002",
         "pbctStatNm": "입찰진행중"
       },
-      "created_at": "2026-05-03 06:43:39",
+      "created_at": "2026-05-03 06:44:41",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -3748,7 +3748,7 @@
       "is_expired": 0
     },
     {
-      "id": 2714,
+      "id": 2905,
       "pbanc_mng_no": "885055",
       "cltr_mng_no": "2026-0400-022930",
       "onbid_cltr_nm": " 18K 팔찌 ",
@@ -3831,7 +3831,7 @@
         "pbctStatCd": "0002",
         "pbctStatNm": "입찰진행중"
       },
-      "created_at": "2026-05-03 06:43:39",
+      "created_at": "2026-05-03 06:44:41",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -3855,7 +3855,7 @@
       "is_expired": 0
     },
     {
-      "id": 2715,
+      "id": 2906,
       "pbanc_mng_no": "885055",
       "cltr_mng_no": "2026-0400-022932",
       "onbid_cltr_nm": " 24K 팔찌(18K 장석) ",
@@ -3938,7 +3938,7 @@
         "pbctStatCd": "0002",
         "pbctStatNm": "입찰진행중"
       },
-      "created_at": "2026-05-03 06:43:39",
+      "created_at": "2026-05-03 06:44:41",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -3962,7 +3962,7 @@
       "is_expired": 0
     },
     {
-      "id": 2727,
+      "id": 2918,
       "pbanc_mng_no": "885110",
       "cltr_mng_no": "2026-01264-004",
       "onbid_cltr_nm": "대전광역시 대덕구 법동 282-1 대전지방국세청 보관 골드바 1점",
@@ -4045,7 +4045,7 @@
         "pbctStatCd": "0001",
         "pbctStatNm": "입찰준비중"
       },
-      "created_at": "2026-05-03 06:43:40",
+      "created_at": "2026-05-03 06:44:43",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -4069,7 +4069,7 @@
       "is_expired": 0
     },
     {
-      "id": 2732,
+      "id": 2923,
       "pbanc_mng_no": "885110",
       "cltr_mng_no": "2026-01264-005",
       "onbid_cltr_nm": "대전광역시 대덕구 법동 282-1 대전지방국세청 보관 골드바1점",
@@ -4152,7 +4152,7 @@
         "pbctStatCd": "0001",
         "pbctStatNm": "입찰준비중"
       },
-      "created_at": "2026-05-03 06:43:40",
+      "created_at": "2026-05-03 06:44:43",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -4176,7 +4176,7 @@
       "is_expired": 0
     },
     {
-      "id": 2736,
+      "id": 2927,
       "pbanc_mng_no": "885171",
       "cltr_mng_no": "2026-02186-012",
       "onbid_cltr_nm": "대전광역시 대덕구 법동 282-1 대전지방국세청 체납추적과 보관(골드바 18.75g(2점), 골드바 1g(2점), 골드바 1.875g(3점), 골드바 3.75g(2점), 황금열쇠(1점), 금수저(1점), 금반지(1점), 디올가방(1점)",
@@ -4259,7 +4259,7 @@
         "pbctStatCd": "0001",
         "pbctStatNm": "입찰준비중"
       },
-      "created_at": "2026-05-03 06:43:40",
+      "created_at": "2026-05-03 06:44:43",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -4283,7 +4283,7 @@
       "is_expired": 0
     },
     {
-      "id": 2737,
+      "id": 2928,
       "pbanc_mng_no": "884995",
       "cltr_mng_no": "2026-0400-022776",
       "onbid_cltr_nm": "골드바, 신세계상품권",
@@ -4366,7 +4366,7 @@
         "pbctStatCd": "0002",
         "pbctStatNm": "입찰진행중"
       },
-      "created_at": "2026-05-03 06:43:41",
+      "created_at": "2026-05-03 06:44:44",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -4390,7 +4390,7 @@
       "is_expired": 0
     },
     {
-      "id": 2738,
+      "id": 2929,
       "pbanc_mng_no": "884896",
       "cltr_mng_no": "2026-0400-022746",
       "onbid_cltr_nm": "춘천사랑상품권 2천원권 3매",
@@ -4473,7 +4473,7 @@
         "pbctStatCd": "0002",
         "pbctStatNm": "입찰진행중"
       },
-      "created_at": "2026-05-03 06:43:41",
+      "created_at": "2026-05-03 06:44:44",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -4497,7 +4497,7 @@
       "is_expired": 0
     },
     {
-      "id": 2739,
+      "id": 2930,
       "pbanc_mng_no": "884255",
       "cltr_mng_no": "2026-0400-021859",
       "onbid_cltr_nm": "상품권 기타권리및증권",
@@ -4580,7 +4580,7 @@
         "pbctStatCd": "0002",
         "pbctStatNm": "입찰진행중"
       },
-      "created_at": "2026-05-03 06:43:41",
+      "created_at": "2026-05-03 06:44:44",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -4604,7 +4604,7 @@
       "is_expired": 0
     },
     {
-      "id": 2744,
+      "id": 2935,
       "pbanc_mng_no": "885110",
       "cltr_mng_no": "2025-14859-009",
       "onbid_cltr_nm": "대전광역시 대덕구 법동 282-1 대전지방국세청 보관 검정색 구찌핸드백 1점, 하트문양 금팔찌(14K 4.92g)1점, 갤러리아 상품권 10만원권 2매, 신세계 상품권 1만원권 2매",
@@ -4687,7 +4687,7 @@
         "pbctStatCd": "0001",
         "pbctStatNm": "입찰준비중"
       },
-      "created_at": "2026-05-03 06:43:41",
+      "created_at": "2026-05-03 06:44:44",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -4713,7 +4713,7 @@
   ],
   "expired": [
     {
-      "id": 2685,
+      "id": 2876,
       "pbanc_mng_no": "884087",
       "cltr_mng_no": "2026-0400-021603",
       "onbid_cltr_nm": "순금(99.9) 58.9g",
@@ -4796,7 +4796,7 @@
         "pbctStatCd": "0003",
         "pbctStatNm": "입찰마감"
       },
-      "created_at": "2026-05-03 06:43:36",
+      "created_at": "2026-05-03 06:44:38",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -4820,7 +4820,7 @@
       "is_expired": 1
     },
     {
-      "id": 2569,
+      "id": 2760,
       "pbanc_mng_no": "883870",
       "cltr_mng_no": "2026-0400-021149",
       "onbid_cltr_nm": "삼성전자 등 휴대전화기 갤럭시 A50",
@@ -4903,7 +4903,7 @@
         "pbctStatCd": "0003",
         "pbctStatNm": "입찰마감"
       },
-      "created_at": "2026-05-03 06:43:27",
+      "created_at": "2026-05-03 06:44:28",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -4927,7 +4927,7 @@
       "is_expired": 1
     },
     {
-      "id": 2554,
+      "id": 2745,
       "pbanc_mng_no": "884045",
       "cltr_mng_no": "2026-0400-021612",
       "onbid_cltr_nm": "늑대와여우컴퓨터 데스크톱컴퓨터 WFG-H116FC-IGTB, Intel Core i5 6500(3.2GHz) 외 2종(노트북,모니터)",
@@ -5010,7 +5010,7 @@
         "pbctStatCd": "0003",
         "pbctStatNm": "입찰마감"
       },
-      "created_at": "2026-05-03 06:43:22",
+      "created_at": "2026-05-03 06:44:18",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -5035,5 +5035,5 @@
     }
   ],
   "categories": [],
-  "last_updated": "2026-05-03 15:43:56"
+  "last_updated": "2026-05-03 15:44:58"
 }
