@@ -106,7 +106,7 @@ FLASH_DEEP_DIVE_PROMPT = """
 def get_maverick_batch_analysis(items_list):
     """[긴급] 상위 10개 아이템을 무조건 통과시키는 임시 필터링"""
     print("[!] Stage 1: Temporary Bypass enabled for immediate results.")
-    return [{"id": it['id'], "reason": "Bypass"} for it in items_list[:10]]
+    return [{"id": it['id'], "reason_for_selection": "Bypass"} for it in items_list[:10]]
 
 def get_flash_deep_dive(item, detail_text):
     """Gemini 1.5 Flash를 사용한 2차 정밀 분석"""
@@ -196,7 +196,7 @@ def run_pipeline():
         selected_id_vals = [s['id'] for s in selected_ids]
         for item in batch:
             if item['id'] in selected_id_vals:
-                reason = next(s['reason_for_selection'] for s in selected_ids if s['id'] == item['id'])
+                reason = next((s.get('reason_for_selection', 'Bypass') for s in selected_ids if s['id'] == item['id']), "Bypass")
                 cursor.execute("UPDATE onbid_items SET is_maverick_selected = 1, ai_curator_comment = ? WHERE id = ?", (reason, item['id']))
                 selected_by_maverick.append(item)
             else:
