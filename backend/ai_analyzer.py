@@ -126,6 +126,15 @@ def get_maverick_batch_analysis(items_list):
             response_format={"type": "json_object"}
         )
         content = response.choices[0].message.content
+        if not content:
+            print("[!] Maverick Batch Error: Empty response content")
+            return []
+            
+        # JSON 블록 추출 시도
+        json_match = re.search(r'(\{.*\})', content, re.DOTALL)
+        if json_match:
+            content = json_match.group(1)
+            
         result = json.loads(content)
         return result.get("selected_ids", [])
     except Exception as e:

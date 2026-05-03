@@ -242,8 +242,6 @@ export default async function ItemDetail({ params }: { params: Promise<{ id: str
                 <p className="text-slate-500 italic">상세 분석 리포트가 없는 매물입니다.</p>
               </div>
             )}
-
-            </div>
           </div>
 
           {/* Right: Price & CTA */}
