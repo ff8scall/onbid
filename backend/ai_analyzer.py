@@ -302,6 +302,7 @@ def run_pipeline():
                     ai_margin_percent = ?,
                     ai_pickup_method = ?,
                     ai_difficulty = ?,
+                    ai_curator_comment = ?,
                     ai_deep_dive_report = ?,
                     is_target_item = ?,
                     is_ai_processed = 1,
@@ -313,9 +314,10 @@ def run_pipeline():
                 analysis.get('margin_percent', 0.0),
                 analysis.get('pickup_method', '정보없음'),
                 analysis.get('pickup_difficulty', 'Unknown'),
+                analysis.get('three_line_summary', ''), # 분석 요약 또는 보류 사유
                 json.dumps(analysis, ensure_ascii=False),
-                1 if analysis.get('investment_score', 0) >= 60 else 0, # 60점 이상만 Target
-                1 if analysis.get('investment_score', 0) < 60 else 0,  # 60점 미만은 Substandard
+                1 if analysis.get('investment_score', 0) >= 60 else 0,
+                1 if analysis.get('investment_score', 0) < 60 else 0,
                 item['id']
             ))
             conn.commit()
