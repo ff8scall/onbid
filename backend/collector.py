@@ -83,15 +83,20 @@ def search_it_items():
                 cltr_nm = item.get('onbidCltrNm', '')
                 main_cat, sub_cat = classify_item(cltr_nm)
                 
+                # 상세 정보 즉시 수집 시도
+                pbanc_id = item.get('pbctNo') or item.get('pbancMngNo') or item.get('onbidPbancNo')
+                cltr_id = item.get('cltrMngNo')
+                detail_text = get_item_detail_text(pbanc_id, cltr_id) if pbanc_id else ""
+                
                 try:
                     cursor.execute('''
                         INSERT OR REPLACE INTO onbid_items (
                             pbanc_mng_no, cltr_mng_no, onbid_cltr_nm, cltr_adr, 
-                            min_bid_prc, main_category, sub_category, thumb_url, bid_end_date, raw_data
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            min_bid_prc, main_category, sub_category, thumb_url, bid_end_date, raw_data, detail_text
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ''', (
-                        item.get('pbancMngNo'), 
-                        item.get('cltrMngNo'),
+                        pbanc_id, 
+                        cltr_id,
                         cltr_nm,
                         f"{item.get('lctnSdnm', '')} {item.get('lctnSggnm', '')} {item.get('lctnEmdNm', '')}",
                         item.get('lowstBidPrcIndctCont'),
@@ -99,7 +104,8 @@ def search_it_items():
                         sub_cat,
                         item.get('thnlImgUrlAdr'),
                         item.get('cltrBidEndDt'),
-                        json.dumps(item, ensure_ascii=False)
+                        json.dumps(item, ensure_ascii=False),
+                        detail_text
                     ))
                     total_new_saved += 1
                 except Exception as e:
@@ -113,26 +119,44 @@ def search_it_items():
     print(f"[*] Search completed. Total {total_new_saved} new items processed.")
 
 def get_item_detail_text(pbanc_mng_no, cltr_mng_no):
-    """특정 물건의 상세 설명(cltrDtlCont)을 가져옴"""
+    """특정 물건의 상세 설명(cltrDtlCont)을 가져옴 (JSON/XML 모두 시도)"""
+    if not pbanc_mng_no: return ""
+    
     params = {
         "serviceKey": SERVICE_KEY,
         "pageNo": 1,
-        "numOfRows": 10,
+        "numOfRows": 100, # 혹시 모르니 넉넉하게
         "resultType": "json",
         "pbancMngNo": pbanc_mng_no
     }
     
     try:
-        response = requests.get(DETAIL_URL, params=params, timeout=20)
+        # 1. JSON 시도
+        response = requests.get(DETAIL_URL, params=params, timeout=15)
         if response.status_code == 200:
-            data = response.json()
-            items = data.get('body', {}).get('items', {}).get('item', [])
-            # 해당 관리번호를 가진 아이템 찾기
-            for item in items:
-                if str(item.get('cltrMngNo')) == str(cltr_mng_no):
-                    return item.get('cltrDtlCont', "")
+            try:
+                data = response.json()
+                items = data.get('body', {}).get('items', {}).get('item', [])
+                if isinstance(items, dict): items = [items] # 단건 처리
+                for item in items:
+                    if str(item.get('cltrMngNo')) == str(cltr_mng_no):
+                        return item.get('cltrDtlCont', "")
+            except:
+                pass # JSON 파싱 실패 시 XML 시도
+        
+        # 2. XML 시도 (JSON이 가끔 불안정함)
+        params["resultType"] = "xml"
+        response = requests.get(DETAIL_URL, params=params, timeout=15)
+        if response.status_code == 200:
+            root = ET.fromstring(response.text)
+            for item_node in root.findall('.//item'):
+                c_mng = item_node.find('cltrMngNo')
+                if c_mng is not None and str(c_mng.text) == str(cltr_mng_no):
+                    dtl = item_node.find('cltrDtlCont')
+                    return dtl.text if dtl is not None else ""
+                    
     except Exception as e:
-        print(f"[!] Detailed API Error: {e}")
+        print(f"[!] Detail API Error ({pbanc_mng_no}): {e}")
     return ""
 
 def collect_details(pbanc_mng_no):

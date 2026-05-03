@@ -280,7 +280,8 @@ def run_pipeline():
     # Stage 2: Flash Deep Dive (정예 매물 대상)
     print(f"[*] {len(selected_by_maverick)}건 정예 매물 유형 분류 및 Deep Dive 가동...", flush=True)
     for item in selected_by_maverick:
-        detail_text = get_item_detail_text(item['pbanc_mng_no'], item['cltr_mng_no'])
+        # DB에 미리 수집된 detail_text 활용
+        detail_text = item['detail_text'] if 'detail_text' in item.keys() and item['detail_text'] else ""
         
         # 유형 판별
         item_type, type_reason = classify_item_type(item, detail_text)
