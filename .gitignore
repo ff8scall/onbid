@@ -3,6 +3,6 @@ node_modules/
 .next/
 __pycache__/
 venv/
-*.db
+# *.db (데이터 영속성을 위해 Git 추적 허용)
 *.log
 .DS_Store

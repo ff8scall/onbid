@@ -1,0 +1,41 @@
+name: Daily OnBid Data Sync
+
+on:
+  schedule:
+    # 한국 시간(KST): 10:00, 15:00, 20:00
+    # UTC 기준: 01:00, 06:00, 11:00
+    - cron: '0 1,6,11 * * *'
+  workflow_dispatch: # 수동 실행 허용
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          pip install -r backend/requirements.txt
+
+      - name: Run Data Pipeline
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          NVIDIA_API_KEY: ${{ secrets.NVIDIA_API_KEY }}
+        run: |
+          python backend/collector.py
+          python backend/ai_analyzer.py
+          python backend/export_data.py
+
+      - name: Commit and Push changes
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add data/pbid_local.db frontend/src/data/items.json
+          git commit -m "chore: 자동 데이터 수집 및 분석 완료 [$(date +'%Y-%m-%d %H:%M:%S') KST]" || echo "No changes to commit"
+          git push
