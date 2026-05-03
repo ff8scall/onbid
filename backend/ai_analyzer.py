@@ -61,15 +61,23 @@ def classify_item_type(item, detail_text):
     # 2. 정보 부족 판별
     is_missing_info = False
     clean_detail = clean_text(detail_text)
-    if not detail_text or len(clean_detail) < 30:
-        is_missing_info = True
-    elif '첨부파일' in detail_text or '공고문' in detail_text:
-        if len(clean_detail) < 150: # 텍스트가 적으면서 첨부파일 언급 시
+    
+    # 감정가가 있는 귀금속/명품은 상세 텍스트가 부족해도 '분석 적합'으로 간주
+    is_high_value = item['sub_category'] in ['귀금속', '명품']
+    has_appraisal = int(item['apsl_evl_amt'] or 0) > 0
+    
+    if is_high_value and has_appraisal:
+        is_missing_info = False # 강제 통과
+    else:
+        if not detail_text or len(clean_detail) < 30:
             is_missing_info = True
+        elif '첨부파일' in detail_text or '공고문' in detail_text:
+            if len(clean_detail) < 150: # 텍스트가 적으면서 첨부파일 언급 시
+                is_missing_info = True
             
     if is_bundle: return "BUNDLE", "일괄 매각 매물 (정밀 시세 산출 어려움)"
     if is_missing_info: return "MISSING", "상세 설명 부족 (첨부파일 참조 매물)"
-    return "SINGLE", "분석 적합 단건 매물"
+    return "SINGLE", "분석 적합 매물"
 
 # Stage 1: Maverick Batch Prompt
 MAVERICK_BATCH_PROMPT = """
@@ -108,15 +116,16 @@ FLASH_DEEP_DIVE_PROMPT = """
 
 **Item Data:**
 - Name: {item_name}
+- Appraisal Price: {appraisal_price} KRW (전문가 감정가)
+- Min Bid Price: {min_bid_price} KRW
 - Detail: {detail_text}
-- Price: {min_bid_price} KRW
 - Address: {address}
 
 **Instructions:**
-1. **Market Price Estimation**: Research and estimate the current "Quick Sale" (Bungaejangter, Danggeun, Joonggonara) market price.
+1. **Market Price Estimation**: Research and estimate the current "Quick Sale" market price. If it's a gemstone/gold, use the Appraisal Price as a baseline and adjust for 2026 market trends.
 2. **Financial Breakdown**: 
-   - Estimated Market Price - (Min Bid Price + Est. Costs like shipping/cleaning/repair) = Net Profit.
-   - Be extremely conservative. If uncertain, lower the resale value.
+   - Net Profit = (Market Price) - (Min Bid Price + Est. Costs).
+   - If Min Bid Price is significantly lower than Appraisal Price, it's a high-priority "Value Play".
 3. **Risk Analysis**: Check for keywords like "고장", "파손", "분실", "작동불능", "하자".
 4. **Copywriting**: 3-line attractive summary in KOREAN.
 5. **Final Scoring**: 0-100 (Only 80+ for items with clear 20%+ margin).
@@ -185,6 +194,7 @@ def get_flash_deep_dive(item, detail_text, item_type, type_reason):
     prompt = FLASH_DEEP_DIVE_PROMPT.format(
         item_name=item['onbid_cltr_nm'],
         detail_text=detail_content,
+        appraisal_price=item['apsl_evl_amt'] or 0,
         min_bid_price=item['min_bid_prc'],
         address=item['cltr_adr']
     )

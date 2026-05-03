@@ -88,18 +88,33 @@ def search_it_items():
                 cltr_id = item.get('cltrMngNo')
                 detail_text = get_item_detail_text(pbanc_id, cltr_id) if pbanc_id else ""
                 
+                # 감정평가액 추출 및 정수 변환
+                raw_apsl = item.get('apslEvlAmt', 0)
+                try:
+                    apsl_val = int(str(raw_apsl).replace(',', '')) if raw_apsl else 0
+                except:
+                    apsl_val = 0
+
+                # 최저입찰가 정수 변환
+                raw_min = item.get('lowstBidPrcIndctCont', 0)
+                try:
+                    min_val = int(str(raw_min).replace(',', '')) if raw_min else 0
+                except:
+                    min_val = 0
+
                 try:
                     cursor.execute('''
                         INSERT OR REPLACE INTO onbid_items (
                             pbanc_mng_no, cltr_mng_no, onbid_cltr_nm, cltr_adr, 
-                            min_bid_prc, main_category, sub_category, thumb_url, bid_end_date, raw_data, detail_text
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            min_bid_prc, apsl_evl_amt, main_category, sub_category, thumb_url, bid_end_date, raw_data, detail_text
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ''', (
                         pbanc_id, 
                         cltr_id,
                         cltr_nm,
                         f"{item.get('lctnSdnm', '')} {item.get('lctnSggnm', '')} {item.get('lctnEmdNm', '')}",
-                        item.get('lowstBidPrcIndctCont'),
+                        min_val,
+                        apsl_val,
                         main_cat,
                         sub_cat,
                         item.get('thnlImgUrlAdr'),
