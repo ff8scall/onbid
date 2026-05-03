@@ -158,7 +158,7 @@ def get_flash_deep_dive(item, detail_text):
 def pre_filter(item):
     """Rule-based 1차 필터링 (토큰 절약용)"""
     name = item['onbid_cltr_nm']
-    price = item['min_bid_prc']
+    price = int(item['min_bid_prc']) if item['min_bid_prc'] else 0
     
     # 1. 블랙리스트 키워드
     black_list = ['폐기물', '매각불가', '변압기', 'PCBs', '폐유', '쓰레기']
