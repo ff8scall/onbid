@@ -6,7 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "export": "py ../backend/export_data.py",
+    "deploy": "npm run export && npm run build"
   },
   "dependencies": {
     "next": "16.2.4",

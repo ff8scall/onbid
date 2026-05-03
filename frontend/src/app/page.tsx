@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import itemsData from "@/data/items.json";
 
 interface OnbidItem {
   id: number;
@@ -20,48 +21,23 @@ interface OnbidItem {
 }
 
 export default function Dashboard() {
-  const [items, setItems] = useState<OnbidItem[]>([]);
-  const [categories, setCategories] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string>("전체보기");
   const [viewMode, setViewMode] = useState<"target" | "candidate" | "substandard">("target");
-  const [loading, setLoading] = useState(true);
+  const [items, setItems] = useState<OnbidItem[]>(itemsData.target as OnbidItem[]);
+  const [categories, setCategories] = useState<string[]>(["전체보기", ...itemsData.categories]);
+  const [selectedCategory, setSelectedCategory] = useState<string>("전체보기");
 
   useEffect(() => {
-    if (viewMode === "target") {
-      fetchCategories();
+    let baseItems: OnbidItem[] = [];
+    if (viewMode === "target") baseItems = itemsData.target as OnbidItem[];
+    else if (viewMode === "candidate") baseItems = itemsData.candidate as OnbidItem[];
+    else if (viewMode === "substandard") baseItems = itemsData.substandard as OnbidItem[];
+
+    if (viewMode === "target" && selectedCategory !== "전체보기") {
+      setItems(baseItems.filter(item => item.sub_category === selectedCategory));
+    } else {
+      setItems(baseItems);
     }
-    fetchItems();
   }, [selectedCategory, viewMode]);
-
-  const fetchCategories = async () => {
-    try {
-      const res = await fetch("http://localhost:8000/categories");
-      const data = await res.json();
-      setCategories(["전체보기", ...data]);
-    } catch (e) {
-      console.error("Failed to fetch categories", e);
-    }
-  };
-
-  const fetchItems = async () => {
-    setLoading(true);
-    try {
-      let url = "http://localhost:8000/items";
-      if (viewMode === "candidate") url = "http://localhost:8000/items/candidates";
-      else if (viewMode === "substandard") url = "http://localhost:8000/items/substandard";
-      
-      if (viewMode === "target" && selectedCategory !== "전체보기") {
-        url += `?category=${selectedCategory}`;
-      }
-      
-      const res = await fetch(url);
-      const data = await res.json();
-      setItems(data);
-    } catch (e) {
-      console.error("Failed to fetch items", e);
-    }
-    setLoading(false);
-  };
 
   const getScoreColor = (score: number) => {
     if (viewMode === "substandard") return "text-red-400 border-red-500/30 bg-red-500/10";
@@ -146,15 +122,8 @@ export default function Dashboard() {
         )}
 
         {/* Grid */}
-        {loading ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3].map((i) => (
-              <div key={i} className="h-80 bg-white/5 rounded-[2.5rem] animate-pulse"></div>
-            ))}
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {items.map((item) => (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {items.map((item) => (
               <Link href={`/items/${item.id}`} key={item.id} className="group h-full">
                 <div className="bg-gradient-to-b from-white/[0.05] to-transparent border border-white/5 rounded-[2.5rem] p-1 transition-all duration-500 group-hover:border-indigo-500/50 group-hover:shadow-2xl group-hover:shadow-indigo-500/10 group-hover:-translate-y-2 h-full min-h-[620px] flex flex-col">
                   <div className="bg-[#0f0f12] rounded-[2.3rem] p-7 h-full flex flex-col flex-grow">
@@ -250,9 +219,8 @@ export default function Dashboard() {
                   </div>
                 </div>
               </Link>
-            ))}
-          </div>
-        )}
+          ))}
+        </div>
       </main>
     </div>
   );

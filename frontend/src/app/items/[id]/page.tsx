@@ -1,8 +1,6 @@
-"use client";
-
-import { useEffect, useState } from "react";
-import { useParams, useRouter } from "next/navigation";
+import itemsData from "@/data/items.json";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 
 interface OnbidItem {
   id: number;
@@ -26,42 +24,49 @@ interface OnbidItem {
   is_ai_processed?: number;
 }
 
-export default function ItemDetail() {
-  const { id } = useParams();
-  const router = useRouter();
-  const [item, setItem] = useState<OnbidItem | null>(null);
-  const [loading, setLoading] = useState(true);
+// 모든 매물 ID에 대한 정적 경로 생성
+export async function generateStaticParams() {
+  const allItems = [
+    ...itemsData.target,
+    ...itemsData.candidate,
+    ...itemsData.substandard
+  ];
+  return allItems.map((item) => ({
+    id: item.id.toString(),
+  }));
+}
 
-  useEffect(() => {
-    fetchItem();
-  }, [id]);
+// 동적 메타데이터 생성 (SEO 핵심)
+export async function generateMetadata({ params }: { params: { id: string } }) {
+  const allItems = [
+    ...itemsData.target,
+    ...itemsData.candidate,
+    ...itemsData.substandard
+  ];
+  const item = allItems.find((i) => i.id.toString() === params.id);
 
-  const fetchItem = async () => {
-    try {
-      const res = await fetch(`http://localhost:8000/items/${id}`);
-      const data = await res.json();
-      if (data.error) {
-        alert(data.error);
-        router.push("/");
-      } else {
-        setItem(data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch item", error);
-    } finally {
-      setLoading(false);
-    }
+  if (!item) return { title: "매물을 찾을 수 없습니다" };
+
+  return {
+    title: `${item.onbid_cltr_nm} | AI 수익분석 리포트`,
+    description: item.ai_curator_comment || `${item.onbid_cltr_nm}의 공매 차익 분석 결과입니다.`,
+    openGraph: {
+      title: item.onbid_cltr_nm,
+      description: item.ai_curator_comment,
+      images: [item.thumb_url || ""],
+    },
   };
+}
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-[#0a0a0c] flex items-center justify-center">
-        <div className="w-10 h-10 border-4 border-white/10 border-t-white rounded-full animate-spin"></div>
-      </div>
-    );
-  }
+export default function ItemDetail({ params }: { params: { id: string } }) {
+  const allItems = [
+    ...itemsData.target,
+    ...itemsData.candidate,
+    ...itemsData.substandard
+  ];
+  const item = allItems.find((i) => i.id.toString() === params.id) as OnbidItem;
 
-  if (!item) return null;
+  if (!item) notFound();
 
   const getScoreColor = (score: number) => {
     if (score >= 80) return "text-emerald-400";
@@ -74,6 +79,11 @@ export default function ItemDetail() {
     if (diff === "Medium") return "text-amber-400";
     return "text-red-400";
   };
+
+  // 온비드 URL 생성
+  const raw = item.raw_data;
+  const baseUrl = "https://www.onbid.co.kr/op/cltrpbancinf/cltrdtl/CltrDtlController/mvmnCltrDtl.do";
+  const onbidUrl = `${baseUrl}?cltrScrnGrpCd=0003&cltrPrptDivCd=${raw.prptDivCd || "0007"}&onbidCltrno=${raw.onbidCltrno}&onbidPbancNo=${raw.onbidPbancNo}&pbctNo=${raw.pbctNo}&pbctCdtnNo=${raw.pbctCdtnNo}`;
 
   return (
     <div className="min-h-screen bg-[#0a0a0c] text-slate-200 font-sans pb-20">
@@ -138,7 +148,7 @@ export default function ItemDetail() {
             </div>
 
             {/* AI Arbitrage Analysis Card */}
-            {item.is_ai_processed === 1 ? (
+            {item.ai_curator_comment ? (
               <div className="bg-gradient-to-br from-white/[0.05] to-white/[0.01] border border-white/10 rounded-[2.5rem] p-10 mb-12 shadow-2xl relative overflow-hidden">
                 <div className="absolute top-0 right-0 w-64 h-64 bg-emerald-500/5 blur-[100px] -z-10"></div>
                 
@@ -223,7 +233,7 @@ export default function ItemDetail() {
               </div>
             ) : (
               <div className="bg-white/5 border border-white/5 rounded-[2.5rem] p-10 mb-12 text-center">
-                <p className="text-slate-500 italic">AI 심층 수익성 분석이 진행 중인 매물입니다.</p>
+                <p className="text-slate-500 italic">상세 분석 리포트가 없는 매물입니다.</p>
               </div>
             )}
 
@@ -267,29 +277,14 @@ export default function ItemDetail() {
                 </div>
               </div>
 
-              <button 
-                onClick={() => {
-                  const raw = item.raw_data;
-                  
-                  // 온비드 동산 매물 상세 페이지의 풀 파라미터 조합
-                  // 사용자님이 제공해주신 주소 체계를 100% 반영합니다.
-                  const baseUrl = "https://www.onbid.co.kr/op/cltrpbancinf/cltrdtl/CltrDtlController/mvmnCltrDtl.do";
-                  const params = new URLSearchParams({
-                    cltrScrnGrpCd: "0003",
-                    cltrPrptDivCd: raw.prptDivCd || "0007",
-                    onbidCltrno: raw.onbidCltrno,
-                    onbidPbancNo: raw.onbidPbancNo,
-                    pbctNo: raw.pbctNo,
-                    pbctCdtnNo: raw.pbctCdtnNo
-                  });
-                  
-                  const url = `${baseUrl}?${params.toString()}`;
-                  window.open(url, "_blank");
-                }}
-                className="w-full py-5 bg-gradient-to-r from-emerald-500 to-indigo-600 text-white rounded-[1.5rem] font-black text-lg hover:brightness-110 transition-all shadow-xl shadow-emerald-500/20 active:scale-[0.98] mb-4"
+              <a 
+                href={onbidUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="w-full py-5 bg-gradient-to-r from-emerald-500 to-indigo-600 text-white rounded-[1.5rem] font-black text-lg hover:brightness-110 transition-all shadow-xl shadow-emerald-500/20 active:scale-[0.98] mb-4 flex items-center justify-center"
               >
                 온비드 입찰하러 가기
-              </button>
+              </a>
               
               <p className="mt-6 text-[10px] text-slate-500 text-center leading-relaxed font-medium">
                 * 본 분석 리포트는 AI의 추정치이며, 입찰 전 반드시 <br/>현장을 방문하여 실물 상태를 확인하시기 바랍니다.
@@ -301,4 +296,3 @@ export default function ItemDetail() {
     </div>
   );
 }
-
