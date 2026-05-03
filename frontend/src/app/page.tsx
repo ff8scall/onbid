@@ -21,7 +21,7 @@ interface OnbidItem {
 }
 
 export default function Dashboard() {
-  const [viewMode, setViewMode] = useState<"target" | "candidate" | "substandard">("target");
+  const [viewMode, setViewMode] = useState<"target" | "candidate" | "substandard" | "expired">("target");
   const [items, setItems] = useState<OnbidItem[]>(itemsData.target as any[]);
   const [categories, setCategories] = useState<string[]>(["전체보기", ...itemsData.categories]);
   const [selectedCategory, setSelectedCategory] = useState<string>("전체보기");
@@ -31,6 +31,7 @@ export default function Dashboard() {
     if (viewMode === "target") baseItems = itemsData.target as any[];
     else if (viewMode === "candidate") baseItems = itemsData.candidate as any[];
     else if (viewMode === "substandard") baseItems = itemsData.substandard as any[];
+    else if (viewMode === "expired") baseItems = itemsData.expired as any[];
 
     if (viewMode === "target" && selectedCategory !== "전체보기") {
       setItems(baseItems.filter(item => item.sub_category === selectedCategory));
@@ -42,6 +43,7 @@ export default function Dashboard() {
   const getScoreColor = (score: number) => {
     if (viewMode === "substandard") return "text-red-400 border-red-500/30 bg-red-500/10";
     if (viewMode === "candidate") return "text-indigo-400 border-indigo-500/30 bg-indigo-500/10";
+    if (viewMode === "expired") return "text-slate-500 border-slate-700/30 bg-slate-800/10";
     if (score >= 80) return "text-emerald-400 border-emerald-500/30 bg-emerald-500/10";
     if (score >= 60) return "text-amber-400 border-amber-500/30 bg-amber-500/10";
     return "text-slate-400 border-slate-500/30 bg-slate-500/10";
@@ -82,6 +84,12 @@ export default function Dashboard() {
               >
                 기준 미달
               </button>
+              <button 
+                onClick={() => setViewMode("expired")}
+                className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${viewMode === "expired" ? "bg-slate-700 text-slate-300 shadow-lg" : "text-slate-500 hover:text-white"}`}
+              >
+                지난 내역
+              </button>
             </div>
           </div>
         </div>
@@ -94,11 +102,13 @@ export default function Dashboard() {
             {viewMode === "target" && <>잠자는 자산을 깨워 <br/><span className="text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-indigo-500">실시간 차익</span>을 선점하세요.</>}
             {viewMode === "candidate" && <>Maverick이 엄선한 <br/><span className="text-indigo-400">잠재적 수익 매물</span>들입니다.</>}
             {viewMode === "substandard" && <>AI 분석 기준에 <br/><span className="text-red-400">미달된 매물</span> 리포트</>}
+            {viewMode === "expired" && <>이미 종료된 <br/><span className="text-slate-400">지난 입찰 내역</span>입니다.</>}
           </h2>
           <p className="text-slate-500 max-w-2xl leading-relaxed font-medium">
             {viewMode === "target" && "Maverick과 Flash 모델이 협업하여 최종 선별한 정예 매물입니다. 실시간 외부 시세 검증이 완료되었습니다."}
             {viewMode === "candidate" && "수천 개의 매물 중 Maverick이 1차 필터링을 통과시킨 매물입니다. 정밀 분석 전 단계입니다."}
             {viewMode === "substandard" && "수익성이 낮거나 리스크가 큰 매물들을 AI가 선별하여 제외했습니다. 탈락 사유를 확인하여 안목을 높이세요."}
+            {viewMode === "expired" && "입찰 기간이 종료된 매물들입니다. 과거 낙찰가 분석 및 시장 흐름 파악용으로 참고하세요."}
           </p>
         </div>
 
@@ -162,19 +172,24 @@ export default function Dashboard() {
                         <div className="mb-4">
                           <span className={`text-[10px] font-bold uppercase tracking-widest block mb-1 ${
                             viewMode === "substandard" ? "text-red-500" : 
-                            viewMode === "candidate" ? "text-indigo-400" : "text-emerald-500"
+                            viewMode === "candidate" ? "text-indigo-400" : 
+                            viewMode === "expired" ? "text-slate-500" : "text-emerald-500"
                           }`}>
                             {viewMode === "substandard" ? "분석 결과" : 
-                             viewMode === "candidate" ? "Maverick 선별" : "예상 수익금"}
+                             viewMode === "candidate" ? "Maverick 선별" : 
+                             viewMode === "expired" ? "입찰 종료" : "예상 수익금"}
                           </span>
                           <div className={`text-3xl font-black group-hover:scale-105 transition-transform origin-left ${
                             viewMode === "substandard" ? "text-slate-400" : 
-                            viewMode === "candidate" ? "text-indigo-400" : "text-emerald-400"
+                            viewMode === "candidate" ? "text-indigo-400" : 
+                            viewMode === "expired" ? "text-slate-500" : "text-emerald-400"
                           }`}>
                             {viewMode === "substandard" ? (
                               <span className="text-xl">수익성 부족</span>
                             ) : viewMode === "candidate" ? (
                               <span className="text-xl">정밀 분석 대기</span>
+                            ) : viewMode === "expired" ? (
+                              <span className="text-xl">기한 만료</span>
                             ) : (
                               <>
                                 +{Number(item.ai_expected_profit).toLocaleString()}
@@ -191,13 +206,18 @@ export default function Dashboard() {
                         {/* Curator Bubble */}
                         <div className={`rounded-2xl p-4 border mb-6 ${
                           viewMode === "substandard" ? "bg-red-500/5 border-red-500/10" : 
-                          viewMode === "candidate" ? "bg-indigo-500/5 border-indigo-500/10" : "bg-white/5 border-white/5"
+                          viewMode === "candidate" ? "bg-indigo-500/5 border-indigo-500/10" : 
+                          viewMode === "expired" ? "bg-slate-500/5 border-slate-500/10" : "bg-white/5 border-white/5"
                         }`}>
                           <p className={`text-xs leading-relaxed italic ${
                             viewMode === "substandard" ? "text-red-400/70" : 
-                            viewMode === "candidate" ? "text-indigo-300/70" : "text-slate-400"
+                            viewMode === "candidate" ? "text-indigo-300/70" : 
+                            viewMode === "expired" ? "text-slate-500" : "text-slate-400"
                           }`}>
-                            "{item.ai_curator_comment || (viewMode === "substandard" ? "분석 기준에 미달하는 매물입니다." : "분석 완료")}"
+                            "{item.ai_curator_comment || (
+                                viewMode === "substandard" ? "분석 기준에 미달하는 매물입니다." : 
+                                viewMode === "expired" ? "입찰 기한이 종료되었습니다." : "분석 완료"
+                             )}"
                           </p>
                         </div>
                     </div>

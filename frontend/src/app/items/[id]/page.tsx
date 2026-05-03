@@ -29,7 +29,8 @@ export async function generateStaticParams() {
   const allItems = [
     ...itemsData.target,
     ...itemsData.candidate,
-    ...itemsData.substandard
+    ...itemsData.substandard,
+    ...itemsData.expired
   ];
   return allItems.map((item) => ({
     id: item.id.toString(),
@@ -42,7 +43,8 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
   const allItems = [
     ...itemsData.target,
     ...itemsData.candidate,
-    ...itemsData.substandard
+    ...itemsData.substandard,
+    ...itemsData.expired
   ];
   const item = allItems.find((i) => i.id.toString() === id);
 
@@ -64,7 +66,8 @@ export default async function ItemDetail({ params }: { params: Promise<{ id: str
   const allItems = [
     ...itemsData.target,
     ...itemsData.candidate,
-    ...itemsData.substandard
+    ...itemsData.substandard,
+    ...itemsData.expired
   ] as any[];
   
   const item = allItems.find((i) => i.id.toString() === id) as OnbidItem;
@@ -240,17 +243,6 @@ export default async function ItemDetail({ params }: { params: Promise<{ id: str
               </div>
             )}
 
-            {/* Raw Data Section */}
-            <div className="bg-white/[0.02] border border-white/5 rounded-[2.5rem] p-10">
-              <h3 className="text-xl font-bold text-white mb-8">온비드 원본 정보</h3>
-              <div className="space-y-6">
-                {Object.entries(item.raw_data).map(([key, value]) => (
-                  <div key={key} className="flex flex-col md:flex-row md:items-center py-4 border-b border-white/5 last:border-0 gap-2 md:gap-0">
-                    <div className="md:w-1/3 text-slate-500 text-sm font-bold uppercase tracking-wider">{key}</div>
-                    <div className="md:w-2/3 text-slate-300 text-sm break-all font-mono">{String(value)}</div>
-                  </div>
-                ))}
-              </div>
             </div>
           </div>
 

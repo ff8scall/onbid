@@ -87,8 +87,8 @@ def search_it_items():
                     cursor.execute('''
                         INSERT OR REPLACE INTO onbid_items (
                             pbanc_mng_no, cltr_mng_no, onbid_cltr_nm, cltr_adr, 
-                            min_bid_prc, main_category, sub_category, thumb_url, raw_data
-                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                            min_bid_prc, main_category, sub_category, thumb_url, bid_end_date, raw_data
+                        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
                     ''', (
                         str(item.get('onbidPbancNo')), 
                         item.get('cltrMngNo'),
@@ -98,6 +98,7 @@ def search_it_items():
                         main_cat,
                         sub_cat,
                         item.get('thnlImgUrlAdr'),
+                        item.get('cltrBidEndDt'),
                         json.dumps(item, ensure_ascii=False)
                     ))
                     total_new_saved += 1
@@ -165,8 +166,8 @@ def collect_details(pbanc_mng_no):
             cursor.execute('''
                 INSERT OR REPLACE INTO onbid_items (
                     pbanc_mng_no, cltr_mng_no, onbid_cltr_nm, cltr_adr, 
-                    min_bid_prc, main_category, sub_category, thumb_url, raw_data
-                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                    min_bid_prc, main_category, sub_category, thumb_url, bid_end_date, raw_data
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             ''', (
                 item.get('pbancMngNo'),
                 item.get('cltrMngNo'),
@@ -176,6 +177,7 @@ def collect_details(pbanc_mng_no):
                 main_cat,
                 sub_cat,
                 item.get('thnlImgUrlAdr'),
+                item.get('cltrBidEndDt'),
                 json.dumps(item, ensure_ascii=False)
             ))
             count += 1
@@ -186,5 +188,26 @@ def collect_details(pbanc_mng_no):
     except Exception as e:
         print(f"[!] Connection Error: {e}")
 
+def mark_expired_items():
+    """현재 시간 기준으로 입찰이 종료된 매물을 만료 처리"""
+    now_str = datetime.now().strftime("%Y%m%d%H%M")
+    conn = sqlite3.connect(DB_PATH)
+    cursor = conn.cursor()
+    
+    cursor.execute('''
+        UPDATE onbid_items 
+        SET is_expired = 1 
+        WHERE bid_end_date IS NOT NULL 
+          AND bid_end_date < ? 
+          AND is_expired = 0
+    ''', (now_str,))
+    
+    count = cursor.rowcount
+    conn.commit()
+    conn.close()
+    if count > 0:
+        print(f"[*] {count} items marked as expired.")
+
 if __name__ == "__main__":
     search_it_items()
+    mark_expired_items()

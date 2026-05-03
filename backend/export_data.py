@@ -17,31 +17,36 @@ def export_to_json():
     cursor = conn.cursor()
 
     # 1. 정예 매물 (Target)
-    cursor.execute('SELECT * FROM onbid_items WHERE main_category = "환금성자산" AND is_target_item = 1 AND is_substandard = 0 ORDER BY ai_score DESC')
+    cursor.execute('SELECT * FROM onbid_items WHERE main_category = "환금성자산" AND is_target_item = 1 AND is_substandard = 0 AND is_expired = 0 ORDER BY ai_score DESC')
     target_items = [dict(row) for row in cursor.fetchall()]
-
+    
     # 2. 후보 매물 (Candidate)
-    cursor.execute('SELECT * FROM onbid_items WHERE is_maverick_selected = 1 AND is_target_item = 0 AND is_substandard = 0 ORDER BY ai_score DESC')
+    cursor.execute('SELECT * FROM onbid_items WHERE is_maverick_selected = 1 AND is_target_item = 0 AND is_substandard = 0 AND is_expired = 0 ORDER BY ai_score DESC')
     candidate_items = [dict(row) for row in cursor.fetchall()]
-
+    
     # 3. 기준 미달 (Substandard)
-    cursor.execute('SELECT * FROM onbid_items WHERE is_substandard = 1 ORDER BY ai_score DESC')
+    cursor.execute('SELECT * FROM onbid_items WHERE is_substandard = 1 AND is_expired = 0 ORDER BY ai_score DESC')
     substandard_items = [dict(row) for row in cursor.fetchall()]
-
+    
+    # 4. 지난 내역 (Expired)
+    cursor.execute('SELECT * FROM onbid_items WHERE is_expired = 1 ORDER BY bid_end_date DESC')
+    expired_items = [dict(row) for row in cursor.fetchall()]
+    
     # JSON 데이터 파싱
-    for items in [target_items, candidate_items, substandard_items]:
+    for items in [target_items, candidate_items, substandard_items, expired_items]:
         for item in items:
             if item.get('raw_data'):
                 item['raw_data'] = json.loads(item['raw_data'])
-
+    
     # 카테고리 추출 (정예 매물 기준)
-    cursor.execute("SELECT DISTINCT sub_category FROM onbid_items WHERE main_category = '환금성자산' AND is_target_item = 1 AND is_substandard = 0")
+    cursor.execute("SELECT DISTINCT sub_category FROM onbid_items WHERE main_category = '환금성자산' AND is_target_item = 1 AND is_substandard = 0 AND is_expired = 0")
     categories = [row[0] for row in cursor.fetchall()]
-
+    
     data = {
         "target": target_items,
         "candidate": candidate_items,
         "substandard": substandard_items,
+        "expired": expired_items,
         "categories": categories,
         "last_updated": sqlite3.connect(DB_PATH).execute("SELECT datetime('now', 'localtime')").fetchone()[0]
     }

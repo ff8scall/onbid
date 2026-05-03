@@ -55,7 +55,9 @@ def init_db():
         ("is_target_item", "INTEGER DEFAULT 0"),
         ("is_substandard", "INTEGER DEFAULT 0"),
         ("is_maverick_selected", "INTEGER DEFAULT 0"),
-        ("ai_deep_dive_report", "TEXT")
+        ("ai_deep_dive_report", "TEXT"),
+        ("bid_end_date", "TEXT"),
+        ("is_expired", "INTEGER DEFAULT 0")
     ]
     
     cursor.execute("PRAGMA table_info(onbid_items)")
