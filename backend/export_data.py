@@ -17,7 +17,7 @@ def export_to_json():
     cursor = conn.cursor()
 
     # 1. 정예 매물 (Target)
-    cursor.execute('SELECT * FROM onbid_items WHERE main_category = "환금성자산" AND is_target_item = 1 AND is_substandard = 0 AND is_expired = 0 ORDER BY ai_score DESC')
+    cursor.execute('SELECT * FROM onbid_items WHERE is_target_item = 1 AND is_substandard = 0 AND is_expired = 0 ORDER BY ai_score DESC')
     target_items = [dict(row) for row in cursor.fetchall()]
     
     # 2. 후보 매물 (Candidate)
