@@ -36,6 +36,41 @@ def clean_text(text):
     text = re.sub(r'\s+', ' ', text).strip()
     return text
 
+def classify_item_type(item, detail_text):
+    """매물의 유형을 판별 (단건 vs 일괄 vs 정보부족)"""
+    name = item['onbid_cltr_nm']
+    
+    # 1. 일괄 매각 판별 (정규식)
+    # '외 N건', '일체', '등 N점', 'N개' (N > 1)
+    bundle_patterns = [
+        r'외\s*\d+\s*건', 
+        r'일체', 
+        r'\d+\s*점', 
+        r'\d+\s*개',
+        r'일괄'
+    ]
+    
+    is_bundle = False
+    for p in bundle_patterns:
+        if re.search(p, name):
+            # 단건인 경우(1개, 1점)는 제외
+            if re.search(r'1\s*개', name) or re.search(r'1\s*점', name):
+                continue
+            is_bundle = True
+            break
+            
+    # 2. 정보 부족 판별
+    is_missing_info = False
+    if not detail_text or len(clean_text(detail_text)) < 50:
+        is_missing_info = True
+    elif '첨부파일' in detail_text or '공고문' in detail_text:
+        if len(clean_text(detail_text)) < 200: # 텍스트가 적으면서 첨부파일 언급 시
+            is_missing_info = True
+            
+    if is_bundle: return "BUNDLE", "일괄 매각 매물 (정밀 시세 산출 어려움)"
+    if is_missing_info: return "MISSING", "상세 설명 부족 (첨부파일 참조 매물)"
+    return "SINGLE", "분석 적합 단건 매물"
+
 # Stage 1: Maverick Batch Prompt
 MAVERICK_BATCH_PROMPT = """
 **Role:** You are a strategic arbitrage filter engine for the OnBid auction market.
@@ -69,7 +104,7 @@ Return a JSON object with a key "selected_ids" containing a list of objects.
 # Stage 2: Flash Deep Dive Prompt
 FLASH_DEEP_DIVE_PROMPT = """
 **Role:** You are a senior investment analyst specializing in physical asset arbitrage.
-**Task:** Perform a "Deep Dive" analysis on this high-potential item and provide the report in KOREAN.
+**Task:** Perform a "Deep Dive" financial analysis on this SINGLE auction item and provide a KOREAN report.
 
 **Item Data:**
 - Name: {item_name}
@@ -78,14 +113,17 @@ FLASH_DEEP_DIVE_PROMPT = """
 - Address: {address}
 
 **Instructions:**
-1. **Real-time Price Estimation**: Estimate current resale value based on 2026 market trends.
-2. **Risk Analysis**: Identify any "Toxic Clauses" in the detail text (e.g., hidden defects, pickup constraints).
-3. **Copywriting**: Write a 3-line attractive summary for resellers (Must be in KOREAN).
-4. **Final Scoring**: Provide a score from 0-100.
+1. **Market Price Estimation**: Research and estimate the current "Quick Sale" (Bungaejangter, Danggeun, Joonggonara) market price.
+2. **Financial Breakdown**: 
+   - Estimated Market Price - (Min Bid Price + Est. Costs like shipping/cleaning/repair) = Net Profit.
+   - Be extremely conservative. If uncertain, lower the resale value.
+3. **Risk Analysis**: Check for keywords like "고장", "파손", "분실", "작동불능", "하자".
+4. **Copywriting**: 3-line attractive summary in KOREAN.
+5. **Final Scoring**: 0-100 (Only 80+ for items with clear 20%+ margin).
 
 **Output Format (Strictly JSON):**
 {{
-  "resale_value": 0,
+  "estimated_market_price": 0,
   "expected_profit": 0,
   "margin_percent": 0.0,
   "risk_factors": ["risk1", "risk2"],
@@ -125,13 +163,19 @@ def get_maverick_batch_analysis(items_list):
         print(f"[!] Maverick Batch Error: {e}")
         return []
 
-def get_flash_deep_dive(item, detail_text):
+def get_flash_deep_dive(item, detail_text, item_type, type_reason):
     """Llama 3.1 8B를 사용한 2차 정밀 분석"""
     fallback_res = {
         "investment_score": 0, "expected_profit": 0, "margin_percent": 0, 
         "pickup_method": "정보없음", "pickup_difficulty": "Unknown", 
-        "three_line_summary": "분석 실패"
+        "three_line_summary": "분석 보류"
     }
+    
+    # 1. 분석 불가 항목 처리 (보류)
+    if item_type in ["BUNDLE", "MISSING"]:
+        fallback_res["pickup_difficulty"] = "Hold"
+        fallback_res["three_line_summary"] = f"[{item_type}] {type_reason}"
+        return fallback_res
     
     if not step_client: return fallback_res
     
@@ -234,12 +278,23 @@ def run_pipeline():
         time.sleep(6.5) # Rate limit 준수 (10 RPM)
 
     # Stage 2: Flash Deep Dive (정예 매물 대상)
-    print(f"[*] {len(selected_by_maverick)}건 정예 매물 Deep Dive(Stage 2: Llama 8B) 가동...", flush=True)
+    print(f"[*] {len(selected_by_maverick)}건 정예 매물 유형 분류 및 Deep Dive 가동...", flush=True)
     for item in selected_by_maverick:
         detail_text = get_item_detail_text(item['pbanc_mng_no'], item['cltr_mng_no'])
-        analysis = get_flash_deep_dive(item, detail_text)
+        
+        # 유형 판별
+        item_type, type_reason = classify_item_type(item, detail_text)
+        
+        if item_type != "SINGLE":
+            print(f"[-] Analysis Postponed ({item_type}): {item['onbid_cltr_nm']}")
+            analysis = get_flash_deep_dive(item, detail_text, item_type, type_reason)
+        else:
+            print(f"[*] Deep Dive Starting (SINGLE): {item['onbid_cltr_nm']}")
+            analysis = get_flash_deep_dive(item, detail_text, item_type, type_reason)
         
         if analysis:
+            # 보류 매물은 is_target_item을 0으로 두거나 특정 처리를 할 수 있음
+            # 여기서는 분석이 끝난 것으로 간주하되 점수는 0점으로 저장됨
             cursor.execute("""
                 UPDATE onbid_items SET
                     ai_score = ?,
@@ -248,21 +303,24 @@ def run_pipeline():
                     ai_pickup_method = ?,
                     ai_difficulty = ?,
                     ai_deep_dive_report = ?,
-                    is_target_item = 1,
+                    is_target_item = ?,
                     is_ai_processed = 1,
-                    is_substandard = 0
+                    is_substandard = ?
                 WHERE id = ?
             """, (
                 analysis.get('investment_score', 0),
                 analysis.get('expected_profit', 0),
                 analysis.get('margin_percent', 0.0),
-                analysis.get('pickup_method', ''), # Deep dive 결과 기반
-                analysis.get('pickup_difficulty', ''),
+                analysis.get('pickup_method', '정보없음'),
+                analysis.get('pickup_difficulty', 'Unknown'),
                 json.dumps(analysis, ensure_ascii=False),
+                1 if analysis.get('investment_score', 0) >= 60 else 0, # 60점 이상만 Target
+                1 if analysis.get('investment_score', 0) < 60 else 0,  # 60점 미만은 Substandard
                 item['id']
             ))
             conn.commit()
-            print(f"[+] Deep Dive Completed: {item['onbid_cltr_nm']}")
+            if analysis.get('pickup_difficulty') != "Hold":
+                print(f"[+] Deep Dive Completed: {item['onbid_cltr_nm']}")
         else:
             # 실패 시 나중에 재시도할 수 있도록 처리 (현재는 마크만 함)
             print(f"[!] Deep Dive Failed: {item['onbid_cltr_nm']}")
