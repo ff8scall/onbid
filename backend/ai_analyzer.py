@@ -106,7 +106,7 @@ FLASH_DEEP_DIVE_PROMPT = """
 def get_maverick_batch_analysis(items_list):
     """[긴급] 상위 10개 아이템을 무조건 통과시키는 임시 필터링"""
     print("[!] Stage 1: Temporary Bypass enabled for immediate results.")
-    return [it['id'] for it in items_list[:10]]
+    return [{"id": it['id'], "reason": "Bypass"} for it in items_list[:10]]
 
 def get_flash_deep_dive(item, detail_text):
     """Gemini 1.5 Flash를 사용한 2차 정밀 분석"""

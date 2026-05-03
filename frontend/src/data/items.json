@@ -754,7 +754,7 @@
   ],
   "expired": [
     {
-      "id": 2112,
+      "id": 2303,
       "pbanc_mng_no": "884087",
       "cltr_mng_no": "2026-0400-021603",
       "onbid_cltr_nm": "순금(99.9) 58.9g",
@@ -837,7 +837,7 @@
         "pbctStatCd": "0003",
         "pbctStatNm": "입찰마감"
       },
-      "created_at": "2026-05-03 06:41:28",
+      "created_at": "2026-05-03 06:42:07",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -861,7 +861,7 @@
       "is_expired": 1
     },
     {
-      "id": 1996,
+      "id": 2187,
       "pbanc_mng_no": "883870",
       "cltr_mng_no": "2026-0400-021149",
       "onbid_cltr_nm": "삼성전자 등 휴대전화기 갤럭시 A50",
@@ -944,7 +944,7 @@
         "pbctStatCd": "0003",
         "pbctStatNm": "입찰마감"
       },
-      "created_at": "2026-05-03 06:41:19",
+      "created_at": "2026-05-03 06:41:58",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -968,7 +968,7 @@
       "is_expired": 1
     },
     {
-      "id": 1981,
+      "id": 2172,
       "pbanc_mng_no": "884045",
       "cltr_mng_no": "2026-0400-021612",
       "onbid_cltr_nm": "늑대와여우컴퓨터 데스크톱컴퓨터 WFG-H116FC-IGTB, Intel Core i5 6500(3.2GHz) 외 2종(노트북,모니터)",
@@ -1051,7 +1051,7 @@
         "pbctStatCd": "0003",
         "pbctStatNm": "입찰마감"
       },
-      "created_at": "2026-05-03 06:41:15",
+      "created_at": "2026-05-03 06:41:53",
       "ai_score": null,
       "ai_estimated_specs": null,
       "ai_reason": null,
@@ -1076,5 +1076,5 @@
     }
   ],
   "categories": [],
-  "last_updated": "2026-05-03 15:41:36"
+  "last_updated": "2026-05-03 15:42:15"
 }
