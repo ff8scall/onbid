@@ -104,40 +104,9 @@ FLASH_DEEP_DIVE_PROMPT = """
 """
 
 def get_maverick_batch_analysis(items_list):
-    """NVIDIA NIM을 사용한 1차 광역 필터링 (배치 처리)"""
-    if not step_client: 
-        print("[!] Stage 1: Maverick client not initialized. Using simple fallback.")
-        return [it['id'] for it in items_list[:5]] # 무조건 앞의 5개 통과
-    
-    formatted_items = []
-    for item in items_list:
-        formatted_items.append({
-            "id": item['id'],
-            "name": item['onbid_cltr_nm'],
-            "price": item['min_bid_prc'],
-            "address": item['cltr_adr']
-        })
-        
-    prompt = MAVERICK_BATCH_PROMPT.format(items_json=json.dumps(formatted_items, ensure_ascii=False))
-    
-    try:
-        response = step_client.chat.completions.create(
-            model="meta/llama-3.1-8b-instruct",
-            messages=[{"role": "user", "content": prompt}],
-            temperature=0.1
-        )
-        content = response.choices[0].message.content
-        if not content: return [it['id'] for it in items_list[:3]]
-            
-        json_match = re.search(r'(\{.*\})', content, re.DOTALL)
-        if json_match:
-            content = json_match.group(1)
-            
-        result = json.loads(content)
-        return result.get("selected_ids", [])
-    except Exception as e:
-        print(f"[!] Stage 1 Filter Error: {e}")
-        return [it['id'] for it in items_list[:3]]
+    """[긴급] 상위 10개 아이템을 무조건 통과시키는 임시 필터링"""
+    print("[!] Stage 1: Temporary Bypass enabled for immediate results.")
+    return [it['id'] for it in items_list[:10]]
 
 def get_flash_deep_dive(item, detail_text):
     """Gemini 1.5 Flash를 사용한 2차 정밀 분석"""
