@@ -13,13 +13,13 @@ interface OnbidItem {
   thumb_url?: string;
   created_at: string;
   raw_data: any;
-  ai_score: number;
-  ai_expected_profit: number;
-  ai_margin_percent: number;
-  ai_pickup_method: string;
-  ai_difficulty: string;
-  ai_curator_comment: string;
-  ai_resale_value: number;
+  ai_score?: number;
+  ai_expected_profit?: number;
+  ai_margin_percent?: number;
+  ai_pickup_method?: string;
+  ai_difficulty?: string;
+  ai_curator_comment?: string;
+  ai_resale_value?: number;
   ai_risk_factor?: string;
   is_ai_processed?: number;
 }

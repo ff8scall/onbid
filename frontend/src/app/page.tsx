@@ -11,26 +11,26 @@ interface OnbidItem {
   cltr_adr: string;
   min_bid_prc: number | string;
   sub_category: string;
-  ai_score: number;
-  ai_expected_profit: number;
-  ai_margin_percent: number;
-  ai_pickup_method: string;
-  ai_difficulty: string;
-  ai_curator_comment: string;
-  thumb_url: string;
+  ai_score?: number;
+  ai_expected_profit?: number;
+  ai_margin_percent?: number;
+  ai_pickup_method?: string;
+  ai_difficulty?: string;
+  ai_curator_comment?: string;
+  thumb_url?: string;
 }
 
 export default function Dashboard() {
   const [viewMode, setViewMode] = useState<"target" | "candidate" | "substandard">("target");
-  const [items, setItems] = useState<OnbidItem[]>(itemsData.target as OnbidItem[]);
+  const [items, setItems] = useState<OnbidItem[]>(itemsData.target as any[]);
   const [categories, setCategories] = useState<string[]>(["전체보기", ...itemsData.categories]);
   const [selectedCategory, setSelectedCategory] = useState<string>("전체보기");
 
   useEffect(() => {
     let baseItems: OnbidItem[] = [];
-    if (viewMode === "target") baseItems = itemsData.target as OnbidItem[];
-    else if (viewMode === "candidate") baseItems = itemsData.candidate as OnbidItem[];
-    else if (viewMode === "substandard") baseItems = itemsData.substandard as OnbidItem[];
+    if (viewMode === "target") baseItems = itemsData.target as any[];
+    else if (viewMode === "candidate") baseItems = itemsData.candidate as any[];
+    else if (viewMode === "substandard") baseItems = itemsData.substandard as any[];
 
     if (viewMode === "target" && selectedCategory !== "전체보기") {
       setItems(baseItems.filter(item => item.sub_category === selectedCategory));
