@@ -41,30 +41,30 @@ def classify_item_type(item, detail_text):
     name = item['onbid_cltr_nm']
     
     # 1. 일괄 매각 판별 (정규식)
-    # '외 N건', '일체', '등 N점', 'N개' (N > 1)
+    # '외 N건', '일체', '등 N점', 'N개', 'N대', 'N종', 'N세트', 'N식' (N > 1)
     bundle_patterns = [
-        r'외\s*\d+\s*건', 
+        r'외\s*\d+\s*[건대종점개]', 
         r'일체', 
-        r'\d+\s*점', 
-        r'\d+\s*개',
+        r'\d+\s*[건대종점개세트식set]{1,2}',
         r'일괄'
     ]
     
     is_bundle = False
     for p in bundle_patterns:
         if re.search(p, name):
-            # 단건인 경우(1개, 1점)는 제외
-            if re.search(r'1\s*개', name) or re.search(r'1\s*점', name):
+            # 단건인 경우(1개, 1대, 1점 등)는 제외
+            if re.search(r'1\s*[건대종점개세트식]{1,2}', name):
                 continue
             is_bundle = True
             break
             
     # 2. 정보 부족 판별
     is_missing_info = False
-    if not detail_text or len(clean_text(detail_text)) < 50:
+    clean_detail = clean_text(detail_text)
+    if not detail_text or len(clean_detail) < 30:
         is_missing_info = True
     elif '첨부파일' in detail_text or '공고문' in detail_text:
-        if len(clean_text(detail_text)) < 200: # 텍스트가 적으면서 첨부파일 언급 시
+        if len(clean_detail) < 150: # 텍스트가 적으면서 첨부파일 언급 시
             is_missing_info = True
             
     if is_bundle: return "BUNDLE", "일괄 매각 매물 (정밀 시세 산출 어려움)"
