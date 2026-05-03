@@ -37,13 +37,14 @@ export async function generateStaticParams() {
 }
 
 // 동적 메타데이터 생성 (SEO 핵심)
-export async function generateMetadata({ params }: { params: { id: string } }) {
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const allItems = [
     ...itemsData.target,
     ...itemsData.candidate,
     ...itemsData.substandard
   ];
-  const item = allItems.find((i) => i.id.toString() === params.id);
+  const item = allItems.find((i) => i.id.toString() === id);
 
   if (!item) return { title: "매물을 찾을 수 없습니다" };
 
@@ -58,13 +59,15 @@ export async function generateMetadata({ params }: { params: { id: string } }) {
   };
 }
 
-export default function ItemDetail({ params }: { params: { id: string } }) {
+export default async function ItemDetail({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const allItems = [
     ...itemsData.target,
     ...itemsData.candidate,
     ...itemsData.substandard
   ] as any[];
-  const item = allItems.find((i) => i.id.toString() === params.id) as OnbidItem;
+  
+  const item = allItems.find((i) => i.id.toString() === id) as OnbidItem;
 
   if (!item) notFound();
 
@@ -131,7 +134,7 @@ export default function ItemDetail({ params }: { params: { id: string } }) {
                   {item.sub_category}
                 </span>
                 <span className="px-4 py-1.5 bg-emerald-500/10 text-emerald-400 text-xs font-black rounded-xl border border-emerald-500/20 uppercase tracking-widest">
-                  {item.ai_pickup_method}
+                  {item.ai_pickup_method ?? "정보 없음"}
                 </span>
               </div>
               <h1 className="text-4xl font-black text-white leading-tight mb-6 tracking-tight">
@@ -160,8 +163,8 @@ export default function ItemDetail({ params }: { params: { id: string } }) {
                     </p>
                   </div>
                   <div className="text-center bg-white/5 rounded-3xl p-6 border border-white/5 min-w-[140px]">
-                    <div className={`text-5xl font-black mb-1 ${getScoreColor(item.ai_score || 0)}`}>
-                      {item.ai_score}
+                    <div className={`text-5xl font-black mb-1 ${getScoreColor(item.ai_score ?? 0)}`}>
+                      {item.ai_score ?? 0}
                     </div>
                     <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">투자 매력도</div>
                   </div>
