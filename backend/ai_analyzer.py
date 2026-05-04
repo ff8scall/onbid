@@ -122,21 +122,14 @@ FLASH_DEEP_DIVE_PROMPT = """
 - Address: {address}
 
 **Instructions:**
-1. **Market Price Estimation**: Research and estimate the current "Quick Sale" market price. 
-   - For Gemstones/Gold: Use Appraisal Price as a baseline, but check current 2026 market rates.
-   - For Single IT Items (Computer/Laptop): Check resale value for exact model specs.
-2. **Break-even Analysis**:
-   - Est. Costs: Include shipping, cleaning, taxes, and repair.
-   - Break-even Price = Estimated Market Price - Est. Costs.
-3. **Financial Breakdown**: 
-   - Net Profit = Break-even Price - Min Bid Price.
-   - If Min Bid Price >= Break-even Price, the item MUST receive an investment_score below 40.
-   - Only 85+ score for items with 20%+ net profit margin.
-
-4. **Price Gap Analysis**:
-   - Why is this item expected to sell at the "Estimated Market Price" despite the "Min Bid Price"?
-   - Is it due to the auction's lack of visibility, a specific brand premium, or a recent market trend?
-   - Provide a detailed reasoning for this price gap (margin).
+1. **Financial Logic (Crucial)**: 
+   - Primary Reason for Margin: Compare "Appraisal Price" (Expert Value) vs "Min Bid Price".
+   - If Min Bid Price is significantly lower than Appraisal Price, highlight the **Price Drop Ratio** (e.g., "70% discount from initial expert valuation due to repeated auction failures").
+2. **Market Price Estimation**: Research the current resale value for this SPECIFIC model/brand.
+3. **Price Gap Analysis (NO VAGUE REASONING)**:
+   - **DO NOT** use vague regional reasons (e.g., "Shillim-dong has shops") or generic brand talk.
+   - **DO** explain why the market price is higher than the current bid (e.g., "The model 'LV Keepall 50' sells for 2M KRW in used markets, but the current bid is only 0.75M KRW").
+   - Mention the potential resale liquidity (how fast it sells).
 
 **Output Format (Strictly a JSON object):**
 {{
@@ -145,10 +138,10 @@ FLASH_DEEP_DIVE_PROMPT = """
   "break_even_price": number,
   "expected_profit": number,
   "margin_percent": number,
-  "reason_for_price_gap": "Detailed explanation in KOREAN about why there is a profit margin",
-  "simple_summary": "ONE-LINE punchy catchphrase in KOREAN (e.g., '시세 대비 30% 저렴한 급매물!')",
+  "reason_for_price_gap": "LOGICAL financial explanation in KOREAN (Focus on price drop from appraisal and used market comparison)",
+  "simple_summary": "ONE-LINE punchy catchphrase in KOREAN",
   "risk_factors": ["list", "of", "strings"],
-  "three_line_summary": "string in KOREAN (Summary including the core reason for profit)",
+  "three_line_summary": "string in KOREAN",
   "investment_score": number (0-100),
   "pickup_method": "Parcel" or "Visit",
   "pickup_difficulty": "Easy", "Medium", or "Hard"
@@ -204,11 +197,19 @@ def get_flash_deep_dive(item, detail_text, item_type, type_reason):
     # 상세 설명이 없을 경우에 대한 처리 강화
     detail_content = clean_text(detail_text)[:4000] if detail_text else "상세 설명 데이터가 제공되지 않았습니다. 물건 명칭과 주소를 바탕으로 일반적인 가치를 추정하십시오."
     
+    # 가격 하락폭 계산 (감정가 대비)
+    appraisal = item['apsl_evl_amt'] or 0
+    min_bid = item['min_bid_prc']
+    drop_info = ""
+    if appraisal > 0:
+        drop_percent = int((1 - min_bid / appraisal) * 100)
+        drop_info = f"\n- Price Drop: 감정가({appraisal:,.0f}원) 대비 {drop_percent}% 하락한 상태입니다. 유찰이 여러 번 진행되었을 가능성이 큽니다."
+
     prompt = FLASH_DEEP_DIVE_PROMPT.format(
         item_name=item['onbid_cltr_nm'],
-        detail_text=detail_content,
-        appraisal_price=item['apsl_evl_amt'] or 0,
-        min_bid_price=item['min_bid_prc'],
+        detail_text=detail_content + drop_info,
+        appraisal_price=appraisal,
+        min_bid_price=min_bid,
         address=item['cltr_adr']
     )
     
