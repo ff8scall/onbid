@@ -3,7 +3,7 @@
 ## 1. 가치 중심 수집 로직 (`collector.py`)
 - **감정평가액(Appraisal Value) 수집**: 온비드 API의 `apslEvlAmt` 필드를 정수형으로 변환하여 `apsl_evl_amt` 컬럼에 저장.
 - **안정적 매핑**: `onbidPbancNo`를 상세 API의 `pbancMngNo`로 매핑하여 상세 설명 수집 성공률 확보.
-- **중복 처리 및 Upsert (New)**: `UNIQUE(pbanc_mng_no, cltr_mng_no)` 제약을 활용하여 중복 저장을 방지. 기존 매물 수집 시 최저입찰가(`min_bid_prc`)가 변경된 경우에만 `is_ai_processed`를 0으로 초기화하여 재분석을 유도하고, 그 외의 경우에는 기존 분석 결과를 보존.
+- **중복 처리 및 Upsert (New)**: `UNIQUE(cltr_mng_no)` 제약을 활용하여 동일 물건의 중복 저장을 방지. 재경매나 유찰로 인해 공고번호(`pbanc_mng_no`)가 바뀌더라도 동일 물건(`cltr_mng_no`)이라면 기존 데이터를 업데이트(Upsert)함. 최저입찰가(`min_bid_prc`)가 변경된 경우에만 `is_ai_processed`를 0으로 초기화하여 재분석을 유도.
 
 ## 2. AI 분석 파이프라인 (`ai_analyzer.py`)
 - **Stage 1.5 (Selective Classifier)**: 

@@ -108,11 +108,12 @@ def search_it_items():
                             pbanc_mng_no, cltr_mng_no, onbid_cltr_nm, cltr_adr, 
                             min_bid_prc, apsl_evl_amt, main_category, sub_category, thumb_url, bid_end_date, raw_data, detail_text
                         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                        ON CONFLICT(pbanc_mng_no, cltr_mng_no) DO UPDATE SET
+                        ON CONFLICT(cltr_mng_no) DO UPDATE SET
                             is_ai_processed = CASE 
                                 WHEN onbid_items.min_bid_prc <> excluded.min_bid_prc THEN 0 
                                 ELSE onbid_items.is_ai_processed 
                             END,
+                            pbanc_mng_no = excluded.pbanc_mng_no, -- 공고번호 업데이트
                             min_bid_prc = excluded.min_bid_prc,
                             apsl_evl_amt = excluded.apsl_evl_amt,
                             onbid_cltr_nm = excluded.onbid_cltr_nm,
@@ -223,11 +224,12 @@ def collect_details(pbanc_mng_no):
                     pbanc_mng_no, cltr_mng_no, onbid_cltr_nm, cltr_adr, 
                     min_bid_prc, main_category, sub_category, thumb_url, bid_end_date, raw_data
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-                ON CONFLICT(pbanc_mng_no, cltr_mng_no) DO UPDATE SET
+                ON CONFLICT(cltr_mng_no) DO UPDATE SET
                     is_ai_processed = CASE 
                         WHEN onbid_items.min_bid_prc <> excluded.min_bid_prc THEN 0 
                         ELSE onbid_items.is_ai_processed 
                     END,
+                    pbanc_mng_no = excluded.pbanc_mng_no,
                     min_bid_prc = excluded.min_bid_prc,
                     onbid_cltr_nm = excluded.onbid_cltr_nm,
                     cltr_adr = excluded.cltr_adr,
