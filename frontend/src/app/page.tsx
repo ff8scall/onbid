@@ -17,6 +17,8 @@ interface OnbidItem {
   ai_pickup_method?: string;
   ai_difficulty?: string;
   ai_curator_comment?: string;
+  ai_catchphrase?: string;
+  ai_reason?: string;
   thumb_url?: string;
 }
 
@@ -203,23 +205,33 @@ export default function Dashboard() {
                           {item.onbid_cltr_nm}
                         </h3>
                         
-                        {/* Curator Bubble */}
-                        <div className={`rounded-2xl p-4 border mb-6 ${
-                          viewMode === "substandard" ? "bg-red-500/5 border-red-500/10" : 
-                          viewMode === "candidate" ? "bg-indigo-500/5 border-indigo-500/10" : 
-                          viewMode === "expired" ? "bg-slate-500/5 border-slate-500/10" : "bg-white/5 border-white/5"
-                        }`}>
-                          <p className={`text-xs leading-relaxed italic ${
-                            viewMode === "substandard" ? "text-red-400/70" : 
-                            viewMode === "candidate" ? "text-indigo-300/70" : 
-                            viewMode === "expired" ? "text-slate-500" : "text-slate-400"
+                        {/* AI Catchphrase (Simplified Summary) */}
+                        {item.ai_catchphrase && (
+                          <div className="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 border border-indigo-500/20 rounded-2xl p-4 mb-6 relative overflow-hidden group-hover:from-indigo-500/20 group-hover:to-purple-500/20 transition-all">
+                            <div className="absolute -right-2 -top-2 w-12 h-12 bg-indigo-500/10 blur-xl rounded-full"></div>
+                            <p className="text-[13px] font-black text-indigo-300 leading-tight flex items-center gap-2">
+                              <span className="flex-shrink-0 w-1.5 h-1.5 bg-indigo-400 rounded-full animate-pulse"></span>
+                              {item.ai_catchphrase}
+                            </p>
+                          </div>
+                        )}
+
+                        {/* Curator Bubble - Simplified or Hidden */}
+                        {!item.ai_catchphrase && item.ai_curator_comment && (
+                          <div className={`rounded-2xl p-4 border mb-6 ${
+                            viewMode === "substandard" ? "bg-red-500/5 border-red-500/10" : 
+                            viewMode === "candidate" ? "bg-indigo-500/5 border-indigo-500/10" : 
+                            viewMode === "expired" ? "bg-slate-500/5 border-slate-500/10" : "bg-white/5 border-white/5"
                           }`}>
-                            "{item.ai_curator_comment || (
-                                viewMode === "substandard" ? "분석 기준에 미달하는 매물입니다." : 
-                                viewMode === "expired" ? "입찰 기한이 종료되었습니다." : "분석 완료"
-                             )}"
-                          </p>
-                        </div>
+                            <p className={`text-xs leading-relaxed italic ${
+                              viewMode === "substandard" ? "text-red-400/70" : 
+                              viewMode === "candidate" ? "text-indigo-300/70" : 
+                              viewMode === "expired" ? "text-slate-500" : "text-slate-400"
+                            }`}>
+                              "{item.ai_curator_comment}"
+                            </p>
+                          </div>
+                        )}
                     </div>
 
                     <div className="flex items-center justify-between pt-6 border-t border-white/5 mt-auto">

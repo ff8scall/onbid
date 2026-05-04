@@ -146,6 +146,7 @@ FLASH_DEEP_DIVE_PROMPT = """
   "expected_profit": number,
   "margin_percent": number,
   "reason_for_price_gap": "Detailed explanation in KOREAN about why there is a profit margin",
+  "simple_summary": "ONE-LINE punchy catchphrase in KOREAN (e.g., '시세 대비 30% 저렴한 급매물!')",
   "risk_factors": ["list", "of", "strings"],
   "three_line_summary": "string in KOREAN (Summary including the core reason for profit)",
   "investment_score": number (0-100),
@@ -322,11 +323,10 @@ def run_pipeline():
             # AI가 준 expected_profit을 우선 사용하되, 없을 경우 계산 시도
             raw_profit = analysis.get('expected_profit', 0)
             
-            # 요약문에 차액 발생 사유를 결합하여 더 풍부한 내용 제공
             summary = analysis.get('three_line_summary', '')
             gap_reason = analysis.get('reason_for_price_gap', '')
-            full_comment = f"{summary}\n\n[수익 발생 근거]: {gap_reason}" if gap_reason else summary
-
+            simple_sum = analysis.get('simple_summary', '')
+            
             cursor.execute("""
                 UPDATE onbid_items SET
                     ai_score = ?,
@@ -336,6 +336,8 @@ def run_pipeline():
                     ai_difficulty = ?,
                     ai_curator_comment = ?,
                     ai_deep_dive_report = ?,
+                    ai_catchphrase = ?,
+                    ai_reason = ?,
                     is_target_item = ?,
                     is_ai_processed = 1,
                     is_substandard = ?
@@ -346,8 +348,10 @@ def run_pipeline():
                 analysis.get('margin_percent', 0.0),
                 analysis.get('pickup_method', '정보없음'),
                 analysis.get('pickup_difficulty', 'Unknown'),
-                full_comment, 
+                summary, 
                 json.dumps(analysis, ensure_ascii=False),
+                simple_sum,
+                gap_reason,
                 1 if analysis.get('investment_score', 0) >= 60 else 0,
                 1 if analysis.get('investment_score', 0) < 60 else 0,
                 item['id']

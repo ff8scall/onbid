@@ -19,6 +19,8 @@ interface OnbidItem {
   ai_pickup_method?: string;
   ai_difficulty?: string;
   ai_curator_comment?: string;
+  ai_catchphrase?: string;
+  ai_reason?: string;
   ai_resale_value?: number;
   ai_risk_factor?: string;
   is_ai_processed?: number;
@@ -161,15 +163,27 @@ export default async function ItemDetail({ params }: { params: Promise<{ id: str
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-8 mb-12">
                   <div>
                     <h2 className="text-emerald-400 text-sm font-black uppercase tracking-widest mb-2">Expert Arbitrage Report</h2>
-                    <p className="text-2xl font-bold text-white leading-tight">
-                      "{item.ai_curator_comment}"
+                    <p className="text-2xl font-black text-white leading-[1.3]">
+                      {item.ai_catchphrase || item.ai_curator_comment}
                     </p>
+                    {item.ai_reason && (
+                      <div className="mt-8 bg-indigo-500/5 rounded-[2rem] p-8 border border-indigo-500/10 relative group transition-all hover:bg-indigo-500/10">
+                        <div className="absolute top-6 right-8 text-indigo-500/20 font-black text-4xl opacity-50 select-none">“</div>
+                        <h4 className="text-indigo-400 text-[10px] font-black uppercase tracking-widest mb-3 flex items-center gap-2">
+                          <span className="w-2 h-2 bg-indigo-500 rounded-full animate-pulse"></span>
+                          AI Profit Logic (수익 발생 사유)
+                        </h4>
+                        <p className="text-slate-300 text-sm leading-relaxed font-medium">
+                          {item.ai_reason}
+                        </p>
+                      </div>
+                    )}
                   </div>
-                  <div className="text-center bg-white/5 rounded-3xl p-6 border border-white/5 min-w-[140px]">
-                    <div className={`text-5xl font-black mb-1 ${getScoreColor(item.ai_score ?? 0)}`}>
+                  <div className="text-center bg-white/5 rounded-[2.5rem] p-8 border border-white/5 min-w-[160px] flex flex-col items-center justify-center shadow-xl shadow-black/20">
+                    <div className={`text-6xl font-black mb-1 ${getScoreColor(item.ai_score ?? 0)}`}>
                       {item.ai_score ?? 0}
                     </div>
-                    <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest">투자 매력도</div>
+                    <div className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-2">Investment Score</div>
                   </div>
                 </div>
 
