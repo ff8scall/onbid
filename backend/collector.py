@@ -104,10 +104,26 @@ def search_it_items():
 
                 try:
                     cursor.execute('''
-                        INSERT OR REPLACE INTO onbid_items (
+                        INSERT INTO onbid_items (
                             pbanc_mng_no, cltr_mng_no, onbid_cltr_nm, cltr_adr, 
                             min_bid_prc, apsl_evl_amt, main_category, sub_category, thumb_url, bid_end_date, raw_data, detail_text
                         ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                        ON CONFLICT(pbanc_mng_no, cltr_mng_no) DO UPDATE SET
+                            is_ai_processed = CASE 
+                                WHEN onbid_items.min_bid_prc <> excluded.min_bid_prc THEN 0 
+                                ELSE onbid_items.is_ai_processed 
+                            END,
+                            min_bid_prc = excluded.min_bid_prc,
+                            apsl_evl_amt = excluded.apsl_evl_amt,
+                            onbid_cltr_nm = excluded.onbid_cltr_nm,
+                            cltr_adr = excluded.cltr_adr,
+                            main_category = excluded.main_category,
+                            sub_category = excluded.sub_category,
+                            thumb_url = excluded.thumb_url,
+                            bid_end_date = excluded.bid_end_date,
+                            raw_data = excluded.raw_data,
+                            detail_text = excluded.detail_text,
+                            is_expired = 0 -- 재수집된 경우 만료 해제
                     ''', (
                         pbanc_id, 
                         cltr_id,
@@ -203,10 +219,23 @@ def collect_details(pbanc_mng_no):
             main_cat, sub_cat = classify_item(cltr_nm)
             
             cursor.execute('''
-                INSERT OR REPLACE INTO onbid_items (
+                INSERT INTO onbid_items (
                     pbanc_mng_no, cltr_mng_no, onbid_cltr_nm, cltr_adr, 
                     min_bid_prc, main_category, sub_category, thumb_url, bid_end_date, raw_data
                 ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                ON CONFLICT(pbanc_mng_no, cltr_mng_no) DO UPDATE SET
+                    is_ai_processed = CASE 
+                        WHEN onbid_items.min_bid_prc <> excluded.min_bid_prc THEN 0 
+                        ELSE onbid_items.is_ai_processed 
+                    END,
+                    min_bid_prc = excluded.min_bid_prc,
+                    onbid_cltr_nm = excluded.onbid_cltr_nm,
+                    cltr_adr = excluded.cltr_adr,
+                    main_category = excluded.main_category,
+                    sub_category = excluded.sub_category,
+                    thumb_url = excluded.thumb_url,
+                    bid_end_date = excluded.bid_end_date,
+                    raw_data = excluded.raw_data
             ''', (
                 item.get('pbancMngNo'),
                 item.get('cltrMngNo'),

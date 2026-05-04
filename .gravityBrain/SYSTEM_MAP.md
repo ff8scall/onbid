@@ -21,6 +21,7 @@
 ## 4. 핵심 데이터 로직
 - **Appraisal-based Valuation**: 텍스트가 부실하더라도 전문가 감정가(`apsl_evl_amt`)가 존재하면 이를 제1 지표로 삼아 수익성 산출.
 - **Financial Analysis**: `(추정 시장가 - (입찰가 + 부대비용)) = 예상 순수익` 기반의 보수적 스코어링.
+- **Smart Upsert**: `ON CONFLICT` 로직을 통해 중복 저장을 방지하며, 가격 변동 시에만 AI 재분석을 트리거하여 리소스 낭비 방지.
 
 ## 5. 디렉토리 구조
 - `/backend`: 수집 및 AI 분석 파이프라인

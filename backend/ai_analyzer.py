@@ -122,23 +122,35 @@ FLASH_DEEP_DIVE_PROMPT = """
 - Address: {address}
 
 **Instructions:**
-1. **Market Price Estimation**: Research and estimate the current "Quick Sale" market price. If it's a gemstone/gold, use the Appraisal Price as a baseline and adjust for 2026 market trends.
-2. **Financial Breakdown**: 
-   - Net Profit = (Market Price) - (Min Bid Price + Est. Costs).
-   - If Min Bid Price is significantly lower than Appraisal Price, it's a high-priority "Value Play".
-3. **Risk Analysis**: Check for keywords like "고장", "파손", "분실", "작동불능", "하자".
-4. **Copywriting**: 3-line attractive summary in KOREAN.
-5. **Final Scoring**: 0-100 (Only 80+ for items with clear 20%+ margin).
+1. **Market Price Estimation**: Research and estimate the current "Quick Sale" market price. 
+   - For Gemstones/Gold: Use Appraisal Price as a baseline, but check current 2026 market rates.
+   - For Single IT Items (Computer/Laptop): Check resale value for exact model specs.
+2. **Break-even Analysis**:
+   - Est. Costs: Include shipping, cleaning, taxes, and repair.
+   - Break-even Price = Estimated Market Price - Est. Costs.
+3. **Financial Breakdown**: 
+   - Net Profit = Break-even Price - Min Bid Price.
+   - If Min Bid Price >= Break-even Price, the item MUST receive an investment_score below 40.
+   - Only 85+ score for items with 20%+ net profit margin.
 
-**Output Format (Strictly JSON):**
+4. **Price Gap Analysis**:
+   - Why is this item expected to sell at the "Estimated Market Price" despite the "Min Bid Price"?
+   - Is it due to the auction's lack of visibility, a specific brand premium, or a recent market trend?
+   - Provide a detailed reasoning for this price gap (margin).
+
+**Output Format (Strictly a JSON object):**
 {{
-  "estimated_market_price": 0,
-  "expected_profit": 0,
-  "margin_percent": 0.0,
-  "risk_factors": ["risk1", "risk2"],
-  "three_line_summary": "매력적인 3줄 요약 (한국어)",
-  "investment_score": 0,
-  "pickup_difficulty": "Low/Medium/High"
+  "estimated_market_price": number,
+  "estimated_costs": number,
+  "break_even_price": number,
+  "expected_profit": number,
+  "margin_percent": number,
+  "reason_for_price_gap": "Detailed explanation in KOREAN about why there is a profit margin",
+  "risk_factors": ["list", "of", "strings"],
+  "three_line_summary": "string in KOREAN (Summary including the core reason for profit)",
+  "investment_score": number (0-100),
+  "pickup_method": "Parcel" or "Visit",
+  "pickup_difficulty": "Easy", "Medium", or "Hard"
 }}
 """
 
@@ -306,6 +318,15 @@ def run_pipeline():
         if analysis:
             # 보류 매물은 is_target_item을 0으로 두거나 특정 처리를 할 수 있음
             # 여기서는 분석이 끝난 것으로 간주하되 점수는 0점으로 저장됨
+            # 예상 수익 산출 (Break-even Price - Min Bid Price)
+            # AI가 준 expected_profit을 우선 사용하되, 없을 경우 계산 시도
+            raw_profit = analysis.get('expected_profit', 0)
+            
+            # 요약문에 차액 발생 사유를 결합하여 더 풍부한 내용 제공
+            summary = analysis.get('three_line_summary', '')
+            gap_reason = analysis.get('reason_for_price_gap', '')
+            full_comment = f"{summary}\n\n[수익 발생 근거]: {gap_reason}" if gap_reason else summary
+
             cursor.execute("""
                 UPDATE onbid_items SET
                     ai_score = ?,
@@ -321,11 +342,11 @@ def run_pipeline():
                 WHERE id = ?
             """, (
                 analysis.get('investment_score', 0),
-                analysis.get('expected_profit', 0),
+                raw_profit,
                 analysis.get('margin_percent', 0.0),
                 analysis.get('pickup_method', '정보없음'),
                 analysis.get('pickup_difficulty', 'Unknown'),
-                analysis.get('three_line_summary', ''), # 분석 요약 또는 보류 사유
+                full_comment, 
                 json.dumps(analysis, ensure_ascii=False),
                 1 if analysis.get('investment_score', 0) >= 60 else 0,
                 1 if analysis.get('investment_score', 0) < 60 else 0,
