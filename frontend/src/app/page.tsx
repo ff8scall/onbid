@@ -19,6 +19,7 @@ interface OnbidItem {
   ai_curator_comment?: string;
   ai_catchphrase?: string;
   ai_reason?: string;
+  apsl_evl_amt?: number;
   thumb_url?: string;
 }
 
@@ -236,6 +237,14 @@ export default function Dashboard() {
 
                     <div className="flex items-center justify-between pt-6 border-t border-white/5 mt-auto">
                       <div>
+                        {item.apsl_evl_amt && Number(item.apsl_evl_amt) > 0 && (
+                          <div className="mb-2">
+                            <span className="text-[10px] font-bold text-slate-600 uppercase tracking-widest block">감정가</span>
+                            <div className="text-sm font-bold text-slate-500 line-through decoration-slate-700/50">
+                              {Number(item.apsl_evl_amt).toLocaleString()}원
+                            </div>
+                          </div>
+                        )}
                         <span className="text-[11px] font-bold text-slate-500 uppercase tracking-widest block mb-1">현재 최저입찰가</span>
                         <div className="text-2xl font-black text-white tracking-tight">
                           {Number(item.min_bid_prc).toLocaleString()}
