@@ -20,6 +20,7 @@ interface OnbidItem {
   ai_catchphrase?: string;
   ai_reason?: string;
   apsl_evl_amt?: number;
+  bid_end_date?: string;
   thumb_url?: string;
 }
 
@@ -56,6 +57,26 @@ export default function Dashboard() {
     if (diff === "Low") return "bg-emerald-500/10 text-emerald-400 border-emerald-500/20";
     if (diff === "Medium") return "bg-amber-500/10 text-amber-400 border-amber-500/20";
     return "bg-red-500/10 text-red-400 border-red-500/20";
+  };
+
+  const calculateDDay = (endDate?: string) => {
+    if (!endDate || endDate.length < 8) return null;
+    
+    const year = endDate.substring(0, 4);
+    const month = endDate.substring(4, 6);
+    const day = endDate.substring(6, 8);
+    const hour = endDate.substring(8, 10);
+    const min = endDate.substring(10, 12);
+    
+    const end = new Date(`${year}-${month}-${day}T${hour || "00"}:${min || "00"}:00`);
+    const now = new Date();
+    
+    const diff = end.getTime() - now.getTime();
+    const diffDays = Math.ceil(diff / (1000 * 60 * 60 * 24));
+    
+    if (diffDays < 0) return "종료";
+    if (diffDays === 0) return "오늘마감";
+    return `D-${diffDays}`;
   };
 
   return (
@@ -164,6 +185,11 @@ export default function Dashboard() {
                           <span className={`px-3 py-1 backdrop-blur-md text-[9px] font-black rounded-lg border uppercase tracking-widest ${getDifficultyColor(item.ai_difficulty ?? "Medium")}`}>
                             {item.ai_pickup_method ?? "정보 없음"}
                           </span>
+                          {item.bid_end_date && (
+                             <span className="px-3 py-1 bg-red-600/80 backdrop-blur-md text-white text-[9px] font-black rounded-lg border border-red-500/30 uppercase tracking-widest">
+                               {calculateDDay(item.bid_end_date)}
+                             </span>
+                          )}
                         </div>
                         <div className="absolute top-4 right-4">
                           <div className={`px-3 py-1.5 rounded-lg border font-black text-[10px] backdrop-blur-md ${getScoreColor(item.ai_score ?? 0)}`}>
