@@ -29,20 +29,35 @@ export default function Dashboard() {
   const [items, setItems] = useState<OnbidItem[]>(itemsData.target as any[]);
   const [categories, setCategories] = useState<string[]>(["전체보기", ...itemsData.categories]);
   const [selectedCategory, setSelectedCategory] = useState<string>("전체보기");
+  const [sortMode, setSortMode] = useState<"profit" | "dday" | "score">("score");
 
   useEffect(() => {
     let baseItems: OnbidItem[] = [];
-    if (viewMode === "target") baseItems = itemsData.target as any[];
-    else if (viewMode === "candidate") baseItems = itemsData.candidate as any[];
-    else if (viewMode === "substandard") baseItems = itemsData.substandard as any[];
-    else if (viewMode === "expired") baseItems = itemsData.expired as any[];
+    if (viewMode === "target") baseItems = [...itemsData.target] as any[];
+    else if (viewMode === "candidate") baseItems = [...itemsData.candidate] as any[];
+    else if (viewMode === "substandard") baseItems = [...itemsData.substandard] as any[];
+    else if (viewMode === "expired") baseItems = [...itemsData.expired] as any[];
 
+    // 1. Filtering
+    let filtered = baseItems;
     if (viewMode === "target" && selectedCategory !== "전체보기") {
-      setItems(baseItems.filter(item => item.sub_category === selectedCategory));
-    } else {
-      setItems(baseItems);
+      filtered = baseItems.filter(item => item.sub_category === selectedCategory);
     }
-  }, [selectedCategory, viewMode]);
+
+    // 2. Sorting
+    filtered.sort((a, b) => {
+      if (sortMode === "score") return (b.ai_score || 0) - (a.ai_score || 0);
+      if (sortMode === "profit") return (Number(b.ai_expected_profit) || 0) - (Number(a.ai_expected_profit) || 0);
+      if (sortMode === "dday") {
+        const dateA = a.bid_end_date || "999999999999";
+        const dateB = b.bid_end_date || "999999999999";
+        return dateA.localeCompare(dateB);
+      }
+      return 0;
+    });
+
+    setItems(filtered);
+  }, [selectedCategory, viewMode, sortMode]);
 
   const getScoreColor = (score: number) => {
     if (viewMode === "substandard") return "text-red-400 border-red-500/30 bg-red-500/10";
@@ -136,24 +151,48 @@ export default function Dashboard() {
           </p>
         </div>
 
-        {/* Category Tabs (Only show if target mode) */}
-        {viewMode === "target" && (
-          <div className="flex flex-wrap gap-3 mb-12">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all ${
-                  selectedCategory === cat
-                    ? "bg-white text-black shadow-xl scale-105"
-                    : "bg-white/5 text-slate-400 hover:bg-white/10"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
+        {/* Category & Sort Header */}
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-12">
+          {viewMode === "target" && (
+            <div className="flex flex-wrap gap-3">
+              {categories.map((cat) => (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`px-6 py-2.5 rounded-full text-sm font-bold transition-all ${
+                    selectedCategory === cat
+                      ? "bg-white text-black shadow-xl scale-105"
+                      : "bg-white/5 text-slate-400 hover:bg-white/10"
+                  }`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
+          )}
+
+          <div className="flex items-center gap-2 bg-white/5 p-1.5 rounded-2xl border border-white/10 ml-auto">
+            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-3">Sort by</span>
+            <button
+              onClick={() => setSortMode("score")}
+              className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all ${sortMode === "score" ? "bg-indigo-600 text-white shadow-lg" : "text-slate-500 hover:text-white"}`}
+            >
+              점수순
+            </button>
+            <button
+              onClick={() => setSortMode("profit")}
+              className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all ${sortMode === "profit" ? "bg-emerald-600 text-white shadow-lg" : "text-slate-500 hover:text-white"}`}
+            >
+              수익금순
+            </button>
+            <button
+              onClick={() => setSortMode("dday")}
+              className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all ${sortMode === "dday" ? "bg-red-600 text-white shadow-lg" : "text-slate-500 hover:text-white"}`}
+            >
+              마감임박순
+            </button>
           </div>
-        )}
+        </div>
 
         {/* Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
