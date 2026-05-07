@@ -32,6 +32,14 @@ export default function Dashboard() {
   const [sortMode, setSortMode] = useState<"profit" | "dday" | "score">("score");
 
   useEffect(() => {
+    // Default sort modes when switching menus for better UX
+    if (viewMode === "target") setSortMode("profit");
+    else if (viewMode === "candidate") setSortMode("score");
+    else if (viewMode === "expired") setSortMode("dday");
+    else setSortMode("score");
+  }, [viewMode]);
+
+  useEffect(() => {
     let baseItems: OnbidItem[] = [];
     if (viewMode === "target") baseItems = [...itemsData.target] as any[];
     else if (viewMode === "candidate") baseItems = [...itemsData.candidate] as any[];
@@ -49,9 +57,14 @@ export default function Dashboard() {
       if (sortMode === "score") return (b.ai_score || 0) - (a.ai_score || 0);
       if (sortMode === "profit") return (Number(b.ai_expected_profit) || 0) - (Number(a.ai_expected_profit) || 0);
       if (sortMode === "dday") {
-        const dateA = a.bid_end_date || "999999999999";
-        const dateB = b.bid_end_date || "999999999999";
-        return dateA.localeCompare(dateB);
+        // Handle null/missing dates by pushing them to the end
+        const dateA = a.bid_end_date || (viewMode === "expired" ? "000000000000" : "999999999999");
+        const dateB = b.bid_end_date || (viewMode === "expired" ? "000000000000" : "999999999999");
+        
+        if (viewMode === "expired") {
+          return dateB.localeCompare(dateA); // Most recent expired first
+        }
+        return dateA.localeCompare(dateB); // Closest deadline first
       }
       return 0;
     });
@@ -171,26 +184,48 @@ export default function Dashboard() {
             </div>
           )}
 
-          <div className="flex items-center gap-2 bg-white/5 p-1.5 rounded-2xl border border-white/10 ml-auto">
-            <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest px-3">Sort by</span>
-            <button
-              onClick={() => setSortMode("score")}
-              className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all ${sortMode === "score" ? "bg-indigo-600 text-white shadow-lg" : "text-slate-500 hover:text-white"}`}
-            >
-              점수순
-            </button>
-            <button
-              onClick={() => setSortMode("profit")}
-              className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all ${sortMode === "profit" ? "bg-emerald-600 text-white shadow-lg" : "text-slate-500 hover:text-white"}`}
-            >
-              수익금순
-            </button>
-            <button
-              onClick={() => setSortMode("dday")}
-              className={`px-4 py-1.5 rounded-xl text-[10px] font-black uppercase transition-all ${sortMode === "dday" ? "bg-red-600 text-white shadow-lg" : "text-slate-500 hover:text-white"}`}
-            >
-              마감임박순
-            </button>
+          <div className="flex items-center gap-3 bg-white/5 p-2 rounded-[1.5rem] border border-white/10 ml-auto backdrop-blur-xl">
+            <div className="flex items-center gap-1.5 px-3 border-r border-white/10">
+              <svg className="w-3.5 h-3.5 text-slate-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12" />
+              </svg>
+              <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">Sort</span>
+            </div>
+            <div className="flex gap-1.5">
+              <button
+                onClick={() => setSortMode("score")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-bold transition-all ${
+                  sortMode === "score" 
+                    ? "bg-indigo-600 text-white shadow-[0_0_20px_rgba(79,70,229,0.3)]" 
+                    : "text-slate-400 hover:bg-white/5 hover:text-white"
+                }`}
+              >
+                <div className={`w-1.5 h-1.5 rounded-full ${sortMode === "score" ? "bg-white animate-pulse" : "bg-indigo-500"}`}></div>
+                스코어순
+              </button>
+              <button
+                onClick={() => setSortMode("profit")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-bold transition-all ${
+                  sortMode === "profit" 
+                    ? "bg-emerald-600 text-white shadow-[0_0_20px_rgba(16,185,129,0.3)]" 
+                    : "text-slate-400 hover:bg-white/5 hover:text-white"
+                }`}
+              >
+                <div className={`w-1.5 h-1.5 rounded-full ${sortMode === "profit" ? "bg-white animate-pulse" : "bg-emerald-500"}`}></div>
+                수익금순
+              </button>
+              <button
+                onClick={() => setSortMode("dday")}
+                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[11px] font-bold transition-all ${
+                  sortMode === "dday" 
+                    ? "bg-red-600 text-white shadow-[0_0_20px_rgba(220,38,38,0.3)]" 
+                    : "text-slate-400 hover:bg-white/5 hover:text-white"
+                }`}
+              >
+                <div className={`w-1.5 h-1.5 rounded-full ${sortMode === "dday" ? "bg-white animate-pulse" : "bg-red-500"}`}></div>
+                {viewMode === "expired" ? "최근종료순" : "마감임박순"}
+              </button>
+            </div>
           </div>
         </div>
 
